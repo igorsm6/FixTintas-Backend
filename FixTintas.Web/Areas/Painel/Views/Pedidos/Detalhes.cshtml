@@ -1,0 +1,101 @@
+@model PedidoDto
+@{
+    ViewData["Title"] = $"Pedido nº {Model.Id}";
+}
+
+<div class="barra-topo">
+    <h1>Pedido nº @Model.Id <span class="badge status-@Model.Status.ToLowerInvariant()">@Model.Status</span></h1>
+    <a asp-action="Index">‹ Voltar para os pedidos</a>
+</div>
+
+<div class="duas-colunas">
+    <section class="cartao-form">
+        <h2>Itens</h2>
+        <div class="tabela-wrap sem-sombra">
+            <table class="tabela-compacta">
+                <thead>
+                    <tr><th>Produto</th><th>Cor</th><th>Qtd.</th><th>Unitário</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Itens)
+                    {
+                        <tr>
+                            <td>@item.ProdutoDescricao</td>
+                            <td>
+                                @if (item.EhTinta)
+                                {
+                                    <span class="cor-linha"><i class="bolinha-cor" style="background:@item.CorHex"></i>@item.CorNome</span>
+                                }
+                                else
+                                {
+                                    <span class="sub">—</span>
+                                }
+                            </td>
+                            <td>@item.Quantidade</td>
+                            <td>@Formatacao.Moeda(item.PrecoUnitario)</td>
+                            <td>@Formatacao.Moeda(item.Total)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <dl class="valores">
+            <dt>Subtotal</dt>
+            <dd>@Formatacao.Moeda(Model.Subtotal)</dd>
+            @if (Model.DescontoVolume > 0)
+            {
+                <dt>Desconto por volume</dt>
+                <dd>− @Formatacao.Moeda(Model.DescontoVolume)</dd>
+            }
+            @if (Model.DescontoCupom > 0)
+            {
+                <dt>Cupom @Model.Cupom</dt>
+                <dd>− @Formatacao.Moeda(Model.DescontoCupom)</dd>
+            }
+            <dt class="total">Total</dt>
+            <dd class="total">@Formatacao.Moeda(Model.Total)</dd>
+        </dl>
+    </section>
+
+    <section class="cartao-form">
+        <h2>Cliente</h2>
+        <dl class="detalhes">
+            <dt>Nome</dt>
+            <dd>@Model.ClienteNome</dd>
+            <dt>E-mail</dt>
+            <dd>@Model.ClienteEmail</dd>
+            <dt>Feito em</dt>
+            <dd>@Formatacao.DataHora(Model.CriadoEm)</dd>
+            @if (Model.AtualizadoEm is DateTime atualizado)
+            {
+                <dt>Última mudança</dt>
+                <dd>@Formatacao.DataHora(atualizado)</dd>
+            }
+        </dl>
+
+        <h2>Mudar o status</h2>
+        @* Só aparecem os próximos passos permitidos (regra do PedidoNegocio):
+           Pendente -> Pago -> Enviado -> Entregue; Cancelado devolve o estoque. *@
+        @if (Model.ProximosStatus.Count == 0)
+        {
+            <p class="ajuda">Este pedido está finalizado (@Model.Status); o status não muda mais.</p>
+        }
+        else
+        {
+            <div class="acoes-status">
+                @foreach (var status in Model.ProximosStatus)
+                {
+                    var cancelar = status == nameof(StatusPedido.Cancelado);
+                    <form asp-action="AlterarStatus" asp-route-id="@Model.Id" method="post"
+                          data-confirmar="@(cancelar ? "Cancelar este pedido? Os produtos voltam para o estoque." : $"Mudar o pedido para \"{status}\"?")">
+                        <input type="hidden" name="status" value="@status" />
+                        <button type="submit" class="btn @(cancelar ? "btn-perigo" : "btn-primario")">
+                            @(cancelar ? "Cancelar pedido" : $"Marcar como {status}")
+                        </button>
+                    </form>
+                }
+            </div>
+        }
+    </section>
+</div>

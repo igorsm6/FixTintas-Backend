@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- NEGOCIO: todas as regras da loja, usadas pela Web e pela Api. -->
+  <ItemGroup>
+    <ProjectReference Include="..\FixTintas.Modelos\FixTintas.Modelos.csproj" />
+    <ProjectReference Include="..\FixTintas.Repositorio\FixTintas.Repositorio.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

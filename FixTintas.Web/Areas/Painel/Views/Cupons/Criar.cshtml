@@ -1,0 +1,21 @@
+@model CupomSalvarDto
+@{
+    ViewData["Title"] = "Novo cupom";
+}
+
+<div class="barra-topo">
+    <h1>Novo cupom</h1>
+    <a asp-action="Index">‹ Voltar para a lista</a>
+</div>
+
+<form asp-action="Criar" method="post" class="cartao-form">
+    <partial name="_Formulario" model="Model" />
+    <div class="modal-rodape">
+        <a class="btn btn-secundario" asp-action="Index">Cancelar</a>
+        <button type="submit" class="btn btn-primario">Salvar</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

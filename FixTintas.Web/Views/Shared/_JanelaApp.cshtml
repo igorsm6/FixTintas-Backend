@@ -1,0 +1,45 @@
+@*
+    Janela "Baixe o app": aparece SÓ para quem abre a loja num celular (ou tablet) Android,
+    1,5 segundo depois de a página abrir. Quem fecha não vê de novo por 7 dias; quem baixa,
+    por 30 dias (cookie fx_aviso_app). Quem decide quando abrir é o site.js (iniciarJanelaApp).
+
+    O _Layout só coloca esta janela nas páginas de navegação (início, produtos e cores)
+    e só quando o app está disponível (Infra/AppAndroid.cs).
+
+    Duas etapas na mesma janela:
+      convite   -> botão que baixa o .apk direto (/App/Baixar)
+      baixando  -> depois do clique: os 3 passos para instalar
+*@
+@inject AppAndroid AppAndroid
+
+<div id="janela-app" class="modal-overlay" hidden>
+    <div class="modal-box fx-janela-app" role="dialog" aria-modal="true" aria-labelledby="janela-app-titulo" tabindex="-1">
+        <button type="button" class="modal-fechar" data-fechar-app aria-label="Fechar">✕</button>
+
+        <div data-etapa="convite">
+            <img class="fx-janela-app-logo" src="~/img/logo.png" alt="" />
+            <h2 id="janela-app-titulo">Baixe o app FixTintas</h2>
+            <p>Tire uma foto da sua parede e teste as cores antes de comprar. O app também calcula quantas latas você precisa.</p>
+            <a class="fx-botao fx-botao-largo" asp-area="" asp-controller="App" asp-action="Baixar" data-baixar-app>⬇ Baixar o app para Android</a>
+            <p class="fx-app-info">@AppAndroid.Resumo(comVersao: false)</p>
+            <p class="fx-janela-app-links">
+                <a asp-area="" asp-controller="App" asp-action="Index">Como instalar</a>
+                <button type="button" class="fx-link-botao" data-fechar-app>Agora não</button>
+            </p>
+        </div>
+
+        <div data-etapa="baixando" hidden>
+            <h2>O download começou! 🎉</h2>
+            <p>Quando terminar, siga estes passos:</p>
+            <ol class="fx-passos-curtos">
+                <li>Se o navegador perguntar, toque em <strong>Baixar mesmo assim</strong>.</li>
+                <li>Abra o arquivo <strong>FixTintas.apk</strong> (toque em <strong>Abrir</strong>).</li>
+                <li>Permita <strong>instalar apps desta fonte</strong> e toque em <strong>Instalar</strong>.</li>
+            </ol>
+            <button type="button" class="fx-botao fx-botao-largo" data-fechar-app>Continuar no site</button>
+            <p class="fx-janela-app-links">
+                <a asp-area="" asp-controller="App" asp-action="Index">Passo a passo com mais detalhes</a>
+            </p>
+        </div>
+    </div>
+</div>

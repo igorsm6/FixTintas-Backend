@@ -1,0 +1,30 @@
+@{
+    var codigo = ViewData["Codigo"] as int? ?? 0;
+    var (titulo, texto) = codigo switch
+    {
+        404 => ("Página não encontrada", "O endereço que você abriu não existe (ou o item foi removido)."),
+        403 => ("Acesso negado", "Você não tem permissão para abrir esta página."),
+        429 => ("Muitas tentativas", "Você tentou muitas vezes em pouco tempo. Espere um minuto e tente de novo."),
+        _ => ("Algo deu errado", "Não conseguimos abrir esta página agora.")
+    };
+    ViewData["Title"] = titulo;
+    ViewData["SemMenu"] = true;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <div class="fx-cartao fx-cartao-estreito text-center">
+            <p class="fx-icone-grande" aria-hidden="true">🖌️</p>
+            <h1 class="fx-titulo">@titulo</h1>
+            <p>@texto</p>
+            @if (codigo > 0)
+            {
+                <p class="small text-muted">Código @codigo</p>
+            }
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a class="fx-botao" asp-area="" asp-controller="Home" asp-action="Index">Voltar ao início</a>
+                <a class="fx-botao fx-botao-claro" asp-area="" asp-controller="Produtos" asp-action="Index">Ver produtos</a>
+            </div>
+        </div>
+    </div>
+</section>

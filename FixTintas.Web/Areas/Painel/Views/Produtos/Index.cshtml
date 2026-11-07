@@ -1,0 +1,95 @@
+@model List<ProdutoDto>
+@{
+    ViewData["Title"] = "Produtos";
+    var ehGerente = User.EhGerente();
+    var situacao = ViewData["Situacao"] as string;
+}
+
+<div class="barra-topo">
+    <h1>Produtos</h1>
+    <a class="btn btn-primario" asp-action="Criar">+ Novo produto</a>
+</div>
+
+@* Filtros pela URL: /Painel/Produtos?busca=suvinil&categoriaId=2&situacao=baixo *@
+<form asp-action="Index" method="get" class="filtros">
+    <input type="search" name="busca" value="@ViewData["Busca"]" placeholder="Buscar por nome, marca ou código..." aria-label="Buscar" />
+    <select name="categoriaId" asp-items="@((SelectList)ViewData["Categorias"]!)" aria-label="Categoria" data-enviar-ao-mudar>
+        <option value="">Todas as categorias</option>
+    </select>
+    <select name="situacao" aria-label="Situação" data-enviar-ao-mudar>
+        <option value="" selected="@(string.IsNullOrEmpty(situacao))">Todos os status</option>
+        <option value="ativo" selected="@(situacao == "ativo")">Ativos</option>
+        <option value="inativo" selected="@(situacao == "inativo")">Inativos</option>
+        <option value="baixo" selected="@(situacao == "baixo")">Estoque baixo</option>
+        <option value="zerado" selected="@(situacao == "zerado")">Sem estoque</option>
+    </select>
+    <button type="submit" class="btn btn-secundario">Filtrar</button>
+</form>
+
+<p class="ajuda">@Model.Count produto(s). Cada volume de uma tinta é um produto (900 ml, 3,6 L e 18 L); na loja, eles aparecem juntos num card só.</p>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Imagem</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="7" class="vazio">Nenhum produto encontrado.</td></tr>
+            }
+            @foreach (var p in Model)
+            {
+                // "3,6 L · Suvinil · Acrílica Fosco · SUV-123456"
+                var detalhes = new[] { p.Rotulo, p.MarcaNome, p.TipoTintaNome is null ? null : $"{p.TipoTintaNome} {p.Acabamento}", p.Sku }
+                    .Where(texto => !string.IsNullOrEmpty(texto));
+
+                <tr>
+                    <td>
+                        <div class="thumb">
+                            @if (!string.IsNullOrWhiteSpace(p.ImagemUrl))
+                            {
+                                <img src="@p.ImagemUrl" alt="" data-sem-imagem="sem foto" />
+                            }
+                            else
+                            {
+                                <span>sem foto</span>
+                            }
+                        </div>
+                    </td>
+                    <td><strong>@p.Nome</strong><span class="sub">@(string.Join(" · ", detalhes))</span></td>
+                    <td>@p.CategoriaNome</td>
+                    <td class="nowrap">
+                        @if (p.PrecoDe is decimal precoDe)
+                        {
+                            <span class="preco-de">@Formatacao.Moeda(precoDe)</span>
+                        }
+                        @Formatacao.Moeda(p.Preco)
+                    </td>
+                    <td class="nowrap">
+                        @p.Estoque un.
+                        <span class="badge @p.Situacao">@(p.Situacao switch { "zerado" => "Sem estoque", "baixo" => "Estoque baixo", _ => "Em estoque" })</span>
+                    </td>
+                    <td><span class="badge @(p.Inativo ? "inativo" : "ok")">@(p.Inativo ? "Oculto" : "Ativo")</span></td>
+                    <td>
+                        <div class="acoes">
+                            <a class="btn btn-secundario btn-sm" asp-action="Editar" asp-route-id="@p.Id">Editar</a>
+                            @if (ehGerente)
+                            {
+                                <a class="btn btn-perigo btn-sm" asp-action="Excluir" asp-route-id="@p.Id">Excluir</a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

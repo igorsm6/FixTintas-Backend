@@ -1,0 +1,18 @@
+@*
+    Carrossel do topo (o mesmo do site original). As imagens ficam em wwwroot/img.
+    Se alguma imagem não estiver lá, o site.js esconde a imagem quebrada e aparece
+    o texto de reserva (banner-reserva).
+*@
+<section id="inicio" class="banner">
+    <div class="carrossel">
+        <div class="banner-reserva" aria-hidden="true">
+            <strong>FixTintas</strong>
+            <span>Tintas, cores e acessórios para a sua obra</span>
+        </div>
+        <img src="~/img/image.png" class="slide ativo" alt="Banner 1" data-esconder-se-faltar />
+        <img src="~/img/image22.png" class="slide" alt="Banner 2" data-esconder-se-faltar />
+        <img src="~/img/image3.png" class="slide" alt="Banner 3" data-esconder-se-faltar />
+        <button type="button" class="btn-carrossel anterior" aria-label="Imagem anterior">&#10094;</button>
+        <button type="button" class="btn-carrossel proximo" aria-label="Próxima imagem">&#10095;</button>
+    </div>
+</section>

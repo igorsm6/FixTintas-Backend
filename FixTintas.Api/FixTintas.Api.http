@@ -1,0 +1,330 @@
+# Arquivo de teste da API do FixTintas (alternativa à tela do Scalar, em /scalar).
+# Com a Api rodando, clique em "Enviar solicitação" (Visual Studio) ou
+# "Send Request" (VS Code com a extensão REST Client) em cima de cada chamada.
+# A resposta abre ao lado, com o código HTTP e o JSON devolvido.
+#
+# São as MESMAS chamadas que o app Flutter faz (mesmos endereços e mesmos campos).
+#
+# Os ids abaixo (produto 11, cor 12, tipo de tinta 1...) são os do catálogo inicial.
+# Se no seu banco forem outros, veja os certos no GET /api/produtos e no GET /api/cores.
+#
+# Rotas com login: faça o "Login do cliente", copie o "token" da resposta e cole
+# no lugar de cole-o-token-aqui (linha @token). Para as rotas /api/admin, faça o
+# login do gerente e cole o token dele em @tokenGerente.
+
+@FixTintas.Api_HostAddress = http://localhost:5000
+@token = cole-o-token-aqui
+@tokenGerente = cole-o-token-do-gerente-aqui
+
+### Catálogo: cores (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/cores
+Accept: application/json
+
+### Catálogo: cores de uma família (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/cores?familia=Azul
+Accept: application/json
+
+### Catálogo: tipos de tinta, com rendimento e demãos (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/tipos-tinta
+Accept: application/json
+
+### Catálogo: marcas (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/marcas
+Accept: application/json
+
+### Catálogo: latas de tinta à venda — o que o app lista (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/produtos
+Accept: application/json
+
+### Catálogo: só as tintas de uma marca e de um tipo (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/produtos?marcaId=5&tipoTintaId=1
+Accept: application/json
+
+### Catálogo: categorias do menu da loja (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/categorias
+Accept: application/json
+
+### Cadastro de cliente pelo app: só nome, e-mail e senha (espera 201)
+POST {{FixTintas.Api_HostAddress}}/api/auth/registrar
+Content-Type: application/json
+
+{
+  "nome": "Ana Souza",
+  "email": "ana@exemplo.com",
+  "senha": "senha1234"
+}
+
+### Cadastro com o mesmo e-mail (espera 409, regra de negócio)
+POST {{FixTintas.Api_HostAddress}}/api/auth/registrar
+Content-Type: application/json
+
+{
+  "nome": "Ana Souza",
+  "email": "ana@exemplo.com",
+  "senha": "senha1234"
+}
+
+### Cadastro com senha fraca (espera 400: mínimo 8 caracteres, com letras e números)
+# A regra fica em FixTintas.Modelos/RegrasDaSenha.cs e aparece no /scalar, no campo "senha".
+POST {{FixTintas.Api_HostAddress}}/api/auth/registrar
+Content-Type: application/json
+
+{
+  "nome": "Bruno Lima",
+  "email": "bruno@exemplo.com",
+  "senha": "123"
+}
+
+### Cadastro com senha sem número (espera 400: precisa ter letras E números)
+POST {{FixTintas.Api_HostAddress}}/api/auth/registrar
+Content-Type: application/json
+
+{
+  "nome": "Bruno Lima",
+  "email": "bruno@exemplo.com",
+  "senha": "senhasemnumero"
+}
+
+### Login do cliente (espera 200; copie o "token" para a linha @token, lá em cima)
+POST {{FixTintas.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@exemplo.com",
+  "senha": "senha1234"
+}
+
+### Login com a senha errada (espera 401)
+POST {{FixTintas.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@exemplo.com",
+  "senha": "errada123"
+}
+
+### Meus dados (espera 200; sem token, 401)
+GET {{FixTintas.Api_HostAddress}}/api/perfil
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Alterar nome e telefone (espera 200)
+PUT {{FixTintas.Api_HostAddress}}/api/perfil
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Ana Souza Silva",
+  "telefone": "(16) 99999-0000"
+}
+
+### Calculadora: quanto de tinta para uma parede de 2,8 m x 4,5 m, tirando 1,6 m² de porta (espera 200)
+POST {{FixTintas.Api_HostAddress}}/api/calculos/tinta
+Content-Type: application/json
+
+{
+  "tipoTintaId": 1,
+  "alturaM": 2.8,
+  "larguraM": 4.5,
+  "areaDescontarM2": 1.6
+}
+
+### Calculadora pela área, com 3 demãos e só uma marca (espera 200)
+POST {{FixTintas.Api_HostAddress}}/api/calculos/tinta
+Content-Type: application/json
+
+{
+  "tipoTintaId": 1,
+  "areaM2": 40,
+  "areaDescontarM2": 0,
+  "demaos": 3,
+  "marcaId": 5
+}
+
+### Orçamento do carrinho, sem login (espera 200; o preço vem sempre do banco)
+POST {{FixTintas.Api_HostAddress}}/api/pedidos/orcamento
+Content-Type: application/json
+
+{
+  "itens": [
+    { "produtoId": 11, "corId": 12, "quantidade": 2 }
+  ],
+  "cupom": "BEMVINDO10"
+}
+
+### Orçamento de tinta sem cor (espera 400: tinta precisa de cor)
+POST {{FixTintas.Api_HostAddress}}/api/pedidos/orcamento
+Content-Type: application/json
+
+{
+  "itens": [
+    { "produtoId": 11, "corId": 0, "quantidade": 1 }
+  ]
+}
+
+### Fechar o pedido (espera 201; sem token, 401)
+POST {{FixTintas.Api_HostAddress}}/api/pedidos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "itens": [
+    { "produtoId": 11, "corId": 12, "quantidade": 2 }
+  ],
+  "cupom": "BEMVINDO10"
+}
+
+### Meus pedidos (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/pedidos
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Um pedido (espera 200; troque o 1 pelo número do seu pedido)
+GET {{FixTintas.Api_HostAddress}}/api/pedidos/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Cancelar o pedido enquanto está Pendente (espera 200; o estoque volta)
+POST {{FixTintas.Api_HostAddress}}/api/pedidos/1/cancelar
+Authorization: Bearer {{token}}
+
+### Favoritar a cor 12 (espera 204)
+PUT {{FixTintas.Api_HostAddress}}/api/favoritos/12
+Authorization: Bearer {{token}}
+
+### Cores favoritas (espera 200; são as mesmas do site)
+GET {{FixTintas.Api_HostAddress}}/api/favoritos
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Tirar a cor 12 das favoritas (espera 204)
+DELETE {{FixTintas.Api_HostAddress}}/api/favoritos/12
+Authorization: Bearer {{token}}
+
+### Projetos do simulador (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/simulacoes
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Salvar um projeto do simulador (espera 201). Precisa de uma foto "parede.jpg" nesta pasta.
+POST {{FixTintas.Api_HostAddress}}/api/simulacoes
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=FronteiraFixTintas
+
+--FronteiraFixTintas
+Content-Disposition: form-data; name="corId"
+
+12
+--FronteiraFixTintas
+Content-Disposition: form-data; name="tipoTintaId"
+
+1
+--FronteiraFixTintas
+Content-Disposition: form-data; name="nome"
+
+Sala de estar
+--FronteiraFixTintas
+Content-Disposition: form-data; name="imagem"; filename="parede.jpg"
+Content-Type: image/jpeg
+
+< ./parede.jpg
+--FronteiraFixTintas--
+
+### Login do gerente (espera 200 com "trocarSenha": true no primeiro acesso)
+POST {{FixTintas.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "gerente@fixtintas.com",
+  "senha": "Gerente@123"
+}
+
+### Gerente troca a senha inicial (espera 204). Antes disso, as rotas /api/admin respondem 403.
+POST {{FixTintas.Api_HostAddress}}/api/perfil/alterar-senha
+Authorization: Bearer {{tokenGerente}}
+Content-Type: application/json
+
+{
+  "senhaAtual": "Gerente@123",
+  "novaSenha": "Gerente2026"
+}
+
+### Admin: números do estoque (espera 200; cliente recebe 403)
+GET {{FixTintas.Api_HostAddress}}/api/admin/produtos/resumo
+Authorization: Bearer {{tokenGerente}}
+Accept: application/json
+
+### Admin: produtos com estoque baixo — stored procedure sp_Produtos_EstoqueBaixo (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/admin/produtos/estoque-baixo
+Authorization: Bearer {{tokenGerente}}
+Accept: application/json
+
+### Admin: cadastrar uma lata de tinta (espera 201; o SKU é gerado se ficar vazio).
+# categoriaId 1 = Interior; os ids das subcategorias estão no GET /api/categorias.
+POST {{FixTintas.Api_HostAddress}}/api/admin/produtos
+Authorization: Bearer {{tokenGerente}}
+Content-Type: application/json
+
+{
+  "nome": "Suvinil Toque de Seda",
+  "categoriaId": 1,
+  "marcaId": 1,
+  "tipoTintaId": 2,
+  "volumeLitros": 3.6,
+  "preco": 119.9,
+  "estoque": 20,
+  "estoqueMinimo": 5
+}
+
+### Admin: mudar o estoque de um produto (espera 204)
+PUT {{FixTintas.Api_HostAddress}}/api/admin/produtos/11/estoque
+Authorization: Bearer {{tokenGerente}}
+Content-Type: application/json
+
+{
+  "estoque": 40
+}
+
+### Admin: pedidos pendentes de todos os clientes (espera 200)
+GET {{FixTintas.Api_HostAddress}}/api/admin/pedidos?status=Pendente
+Authorization: Bearer {{tokenGerente}}
+Accept: application/json
+
+### Admin: marcar um pedido Pendente como Pago (espera 200)
+# Use o número de um pedido Pendente: o pedido 1 foi cancelado lá em cima, então
+# rode antes o "Fechar o pedido" de novo (ele vira o pedido 2).
+PUT {{FixTintas.Api_HostAddress}}/api/admin/pedidos/2/status
+Authorization: Bearer {{tokenGerente}}
+Content-Type: application/json
+
+{
+  "status": "Pago"
+}
+
+### Admin: novo cupom de 15% (espera 201)
+POST {{FixTintas.Api_HostAddress}}/api/admin/cupons
+Authorization: Bearer {{tokenGerente}}
+Content-Type: application/json
+
+{
+  "codigo": "NATAL15",
+  "tipo": "Percentual",
+  "valor": 15,
+  "valorMinimoPedido": 0,
+  "validoAte": "2026-12-25"
+}
+
+### Admin: novo funcionário (espera 201; a resposta traz a senha temporária, uma vez só)
+POST {{FixTintas.Api_HostAddress}}/api/admin/funcionarios
+Authorization: Bearer {{tokenGerente}}
+Content-Type: application/json
+
+{
+  "nome": "Carlos Pereira",
+  "email": "carlos@fixtintas.com",
+  "perfil": "Funcionario"
+}
+
+### Documento OpenAPI gerado (espera 200, um JSON com todos os endpoints)
+GET {{FixTintas.Api_HostAddress}}/openapi/v1.json
+Accept: application/json

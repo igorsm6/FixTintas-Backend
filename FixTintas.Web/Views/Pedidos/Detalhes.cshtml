@@ -1,0 +1,83 @@
+@model PedidoDto
+@{
+    ViewData["Title"] = $"Pedido nº {Model.Id}";
+    ViewData["SemMenu"] = true;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <p><a asp-action="Index">‹ Meus pedidos</a></p>
+
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+            <h1 class="fx-titulo m-0">Pedido nº @Model.Id</h1>
+            <span class="fx-status status-@Model.Status.ToLowerInvariant()">@Model.Status</span>
+        </div>
+        <p class="text-muted">
+            Feito em @Formatacao.DataHora(Model.CriadoEm)
+            @if (Model.AtualizadoEm is DateTime atualizado)
+            {
+                <span>· atualizado em @Formatacao.DataHora(atualizado)</span>
+            }
+        </p>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="fx-cartao p-0">
+                    <ul class="fx-itens">
+                        @foreach (var item in Model.Itens)
+                        {
+                            <li class="fx-item">
+                                <div class="fx-item-imagem">
+                                    @if (!string.IsNullOrWhiteSpace(item.ImagemUrl))
+                                    {
+                                        <img src="@item.ImagemUrl" alt="" data-sem-imagem="📦" />
+                                    }
+                                    else
+                                    {
+                                        <span aria-hidden="true">@(item.EhTinta ? "🪣" : "🧰")</span>
+                                    }
+                                </div>
+                                <div class="fx-item-info">
+                                    <strong>@item.ProdutoDescricao</strong>
+                                    @if (item.EhTinta)
+                                    {
+                                        <span class="fx-item-cor"><i class="bolinha-cor" style="background:@item.CorHex"></i>Cor: @item.CorNome</span>
+                                    }
+                                    <span class="fx-item-unitario">@item.Quantidade × @Formatacao.Moeda(item.PrecoUnitario)</span>
+                                </div>
+                                <div class="fx-item-total">@Formatacao.Moeda(item.Total)</div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="fx-cartao fx-resumo">
+                    <h2>Valores</h2>
+                    <dl>
+                        <div><dt>Subtotal</dt><dd>@Formatacao.Moeda(Model.Subtotal)</dd></div>
+                        @if (Model.DescontoVolume > 0)
+                        {
+                            <div class="desconto"><dt>Desconto por volume</dt><dd>− @Formatacao.Moeda(Model.DescontoVolume)</dd></div>
+                        }
+                        @if (Model.DescontoCupom > 0)
+                        {
+                            <div class="desconto"><dt>Cupom @Model.Cupom</dt><dd>− @Formatacao.Moeda(Model.DescontoCupom)</dd></div>
+                        }
+                        <div class="total"><dt>Total</dt><dd>@Formatacao.Moeda(Model.Total)</dd></div>
+                    </dl>
+
+                    @* A regra de quem pode cancelar fica no Negocio; aqui só aparece o botão. *@
+                    @if (Model.PodeCancelar)
+                    {
+                        <form asp-action="Cancelar" asp-route-id="@Model.Id" method="post" class="mt-3" data-confirmar="Cancelar o pedido nº @(Model.Id)? Os produtos voltam para o estoque.">
+                            <button type="submit" class="btn btn-outline-danger w-100">Cancelar pedido</button>
+                        </form>
+                        <p class="fx-dica text-center mt-2">Você pode cancelar enquanto o pedido estiver Pendente.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

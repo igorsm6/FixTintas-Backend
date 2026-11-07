@@ -1,0 +1,47 @@
+@model TipoTintaSalvarDto
+@* Partial view: os campos do tipo de tinta, usados em Criar e em Editar. *@
+
+<div asp-validation-summary="ModelOnly" class="alerta erro" role="alert"></div>
+
+<div class="grid-form">
+    <div class="campo">
+        <label asp-for="Nome"></label>
+        <input asp-for="Nome" placeholder="Ex.: Acrílica" />
+        <span asp-validation-for="Nome" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="Acabamento"></label>
+        <select asp-for="Acabamento" asp-items="@(new SelectList(Acabamentos.Todos))"></select>
+        <span asp-validation-for="Acabamento" class="erro"></span>
+    </div>
+
+    <div class="campo span2">
+        <label asp-for="Descricao"></label>
+        <textarea asp-for="Descricao" rows="2"></textarea>
+        <span asp-validation-for="Descricao" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="RendimentoM2PorLitro"></label>
+        <input asp-for="RendimentoM2PorLitro" type="number" step="any" min="1" max="50" />
+        <span asp-validation-for="RendimentoM2PorLitro" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="DemaosRecomendadas"></label>
+        <input asp-for="DemaosRecomendadas" type="number" step="1" min="1" max="6" />
+        <span asp-validation-for="DemaosRecomendadas" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="FatorContraste"></label>
+        <input asp-for="FatorContraste" type="number" step="any" min="0.5" max="1.5" />
+        <p class="ajuda">Fosco 0,80 · Acetinado 0,95 · Brilhante 1,10.</p>
+        <span asp-validation-for="FatorContraste" class="erro"></span>
+    </div>
+
+    <div class="campo span2">
+        <label class="check"><input asp-for="Inativo" /> @Html.DisplayNameFor(m => m.Inativo)</label>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+@*
+    Faixa "Baixe o app" da página inicial (entre as ofertas e o "Sobre Nós").
+    O botão "Baixar o app" baixa o .apk direto (/App/Baixar); "Como instalar" abre a página /App.
+    Os avisos com data-so-computador e data-so-ios aparecem conforme o aparelho (site.js).
+    Configuração do app: Infra/AppAndroid.cs.
+*@
+@inject AppAndroid AppAndroid
+
+<section id="app" class="fx-faixa-app">
+    <div class="container fx-faixa-app-conteudo">
+        <div class="fx-faixa-app-texto">
+            <span class="fx-app-selo">📱 App FixTintas para Android</span>
+            <h2>Teste as cores na sua parede antes de comprar</h2>
+            <p>
+                Fotografe o ambiente, toque na parede e veja na hora como ela fica com cada cor do nosso catálogo.
+                O app também calcula quantas latas você precisa e guarda as suas cores favoritas.
+            </p>
+
+            <div class="fx-app-acoes">
+                @if (AppAndroid.Disponivel)
+                {
+                    <a class="fx-botao fx-botao-grande" asp-area="" asp-controller="App" asp-action="Baixar" data-baixar-app>⬇ Baixar o app</a>
+                    <a class="fx-botao fx-botao-vazado" asp-area="" asp-controller="App" asp-action="Index">Como instalar</a>
+                }
+                else
+                {
+                    <a class="fx-botao fx-botao-vazado" asp-area="" asp-controller="App" asp-action="Index">Conheça o app</a>
+                }
+            </div>
+
+            @if (AppAndroid.Disponivel)
+            {
+                <p class="fx-app-info">@AppAndroid.Resumo(comVersao: false)</p>
+            }
+            else
+            {
+                <p class="fx-app-info">O download estará disponível em breve.</p>
+            }
+            <p class="fx-app-aviso" data-so-computador hidden>💻 Está no computador? Abra o site no seu celular Android para baixar e instalar direto nele.</p>
+            <p class="fx-app-aviso" data-so-ios hidden>🍎 No iPhone o app ainda não está disponível: por enquanto ele é só para Android.</p>
+        </div>
+
+        <partial name="_CelularApp" />
+    </div>
+</section>

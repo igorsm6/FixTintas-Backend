@@ -1,0 +1,83 @@
+@*
+    LAYOUT DO PAINEL DA EQUIPE (área "Painel"). O visual é o do admin.html original
+    (wwwroot/css/painel.css). Os links do gerente só aparecem para o gerente, mas a
+    proteção de verdade é o [Authorize(Roles = ...)] de cada controller.
+*@
+@{
+    var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
+    var acao = ViewContext.RouteData.Values["action"]?.ToString();
+    var ehGerente = User.EhGerente();
+
+    string? Ativo(string nomeDoControlador, bool condicaoExtra = true) =>
+        string.Equals(controlador, nomeDoControlador, StringComparison.OrdinalIgnoreCase) && condicaoExtra ? "ativo" : null;
+
+    var naTelaDeEstoque = string.Equals(acao, "Estoque", StringComparison.OrdinalIgnoreCase);
+    var mensagem = TempData["Mensagem"] as string;
+    var erro = TempData["Erro"] as string;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewData["Title"] - Painel FixTintas</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/css/painel.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app">
+        <aside class="menu">
+            <a asp-area="" asp-controller="Home" asp-action="Index" title="Ir para a loja">
+                <img src="~/img/logo.png" alt="FixTintas" class="menu-logo" />
+            </a>
+
+            <nav aria-label="Menu do painel">
+                <a class="menu-item @Ativo("Inicio")" asp-area="Painel" asp-controller="Inicio" asp-action="Index">🏠 Início</a>
+                <a class="menu-item @Ativo("Produtos", !naTelaDeEstoque)" asp-area="Painel" asp-controller="Produtos" asp-action="Index">📦 Produtos</a>
+                <a class="menu-item @Ativo("Produtos", naTelaDeEstoque)" asp-area="Painel" asp-controller="Produtos" asp-action="Estoque">📊 Estoque</a>
+                <a class="menu-item @Ativo("Pedidos")" asp-area="Painel" asp-controller="Pedidos" asp-action="Index">🧾 Pedidos</a>
+                @if (ehGerente)
+                {
+                    <span class="menu-grupo">Gerente</span>
+                    <a class="menu-item @Ativo("Categorias")" asp-area="Painel" asp-controller="Categorias" asp-action="Index">🗂️ Categorias</a>
+                    <a class="menu-item @Ativo("Marcas")" asp-area="Painel" asp-controller="Marcas" asp-action="Index">🏷️ Marcas</a>
+                    <a class="menu-item @Ativo("TiposTinta")" asp-area="Painel" asp-controller="TiposTinta" asp-action="Index">🪣 Tipos de tinta</a>
+                    <a class="menu-item @Ativo("Cores")" asp-area="Painel" asp-controller="Cores" asp-action="Index">🎨 Cores</a>
+                    <a class="menu-item @Ativo("Cupons")" asp-area="Painel" asp-controller="Cupons" asp-action="Index">🎟️ Cupons</a>
+                    <a class="menu-item @Ativo("Funcionarios")" asp-area="Painel" asp-controller="Funcionarios" asp-action="Index">👥 Funcionários</a>
+                }
+            </nav>
+
+            <div class="menu-rodape">
+                <span class="menu-usuario">
+                    <strong>@(User.Identity?.Name)</strong>
+                    <small>@Perfis.Rotulo(User.Perfil())</small>
+                </span>
+                <a asp-area="" asp-controller="Home" asp-action="Index">← Voltar à loja</a>
+                <a class="btn btn-secundario" asp-area="" asp-controller="Conta" asp-action="AlterarSenha">Alterar senha</a>
+                <form asp-area="" asp-controller="Conta" asp-action="Sair" method="post">
+                    <button type="submit" class="btn btn-secundario">Sair</button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="conteudo">
+            @if (!string.IsNullOrEmpty(erro))
+            {
+                <div class="alerta erro" role="alert">@erro</div>
+            }
+            @if (!string.IsNullOrEmpty(mensagem))
+            {
+                <div class="alerta sucesso" role="status">@mensagem</div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/painel.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

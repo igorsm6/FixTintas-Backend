@@ -1,0 +1,23 @@
+PASTA DO APLICATIVO ANDROID
+===========================
+
+Coloque nesta pasta o arquivo do app com o nome:
+
+    FixTintas.apk
+
+O site oferece esse arquivo para download em /App/Baixar (botões da página inicial,
+da página /App e da janela que aparece para quem abre o site num celular Android).
+Enquanto o arquivo não estiver aqui, o site mostra "Download disponível em breve".
+
+Para publicar uma versão nova do app, é só trocar o arquivo (com o mesmo nome).
+Não precisa parar o site nem compilar de novo.
+
+Como gerar um FixTintas.apk novo (na pasta do projeto Flutter):
+
+    flutter build apk --release --dart-define=API_URL=https://ENDERECO-DA-API
+
+O arquivo sai em build\app\outputs\flutter-apk\app-release.apk.
+Copie para esta pasta e renomeie para FixTintas.apk.
+
+Em vez do arquivo, também dá para usar um link (Google Drive, GitHub...):
+preencha "AppAndroid:LinkExterno" no appsettings.json do FixTintas.Web.

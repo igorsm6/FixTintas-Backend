@@ -1,0 +1,21 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Erro";
+    // Não consulta o banco no layout: esta página precisa abrir mesmo se o erro foi no banco.
+    ViewData["PaginaDeErro"] = true;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <div class="fx-cartao fx-cartao-estreito text-center">
+            <p class="fx-icone-grande" aria-hidden="true">🎨</p>
+            <h1 class="fx-titulo">Ops! Algo deu errado.</h1>
+            <p>Não conseguimos completar o seu pedido agora. Tente de novo em instantes.</p>
+            @if (Model.ShowRequestId)
+            {
+                <p class="small text-muted">Código do erro: <code>@Model.RequestId</code></p>
+            }
+            <a class="fx-botao" asp-area="" asp-controller="Home" asp-action="Index">Voltar ao início</a>
+        </div>
+    </div>
+</section>

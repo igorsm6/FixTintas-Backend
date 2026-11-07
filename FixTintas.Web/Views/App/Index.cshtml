@@ -1,0 +1,100 @@
+@model AppAndroid
+@*
+    Página "Baixe o app" (/App): o que o app faz, o botão de download e como instalar.
+    O botão baixa o .apk direto (/App/Baixar). Configuração: Infra/AppAndroid.cs.
+    Os avisos com data-so-computador e data-so-ios aparecem conforme o aparelho (site.js).
+*@
+@{
+    ViewData["Title"] = "App para Android";
+    ViewData["SemMenu"] = true;
+}
+
+<section class="fx-faixa-app fx-faixa-app-pagina">
+    <div class="container fx-faixa-app-conteudo">
+        <div class="fx-faixa-app-texto">
+            <span class="fx-app-selo">📱 App FixTintas para Android</span>
+            <h1>Teste as cores na sua parede antes de comprar</h1>
+            <p>Com o app FixTintas você fotografa o ambiente, toca na parede e vê na hora como ela fica com cada cor do nosso catálogo.</p>
+
+            <ul class="fx-app-recursos">
+                <li><span aria-hidden="true">🎨</span> Simulador: pinte a parede da sua foto com as cores da loja</li>
+                <li><span aria-hidden="true">🧮</span> Calculadora: descubra quantas latas comprar</li>
+                <li><span aria-hidden="true">❤️</span> Cores favoritas guardadas na sua conta</li>
+                <li><span aria-hidden="true">🛒</span> Compre e acompanhe os seus pedidos</li>
+            </ul>
+
+            <div class="fx-app-acoes">
+                @if (Model.Disponivel)
+                {
+                    <a class="fx-botao fx-botao-grande" asp-action="Baixar" data-baixar-app>⬇ Baixar o app para Android</a>
+                }
+                else
+                {
+                    <span class="fx-app-em-breve">Download disponível em breve</span>
+                }
+            </div>
+            <p class="fx-app-info">@(Model.Disponivel ? Model.Resumo() : $"Grátis · Android {Model.AndroidMinimo} ou superior")</p>
+
+            <p class="fx-app-aviso" data-so-computador hidden>💻 Está no computador? Abra esta página no seu celular Android para baixar e instalar direto nele.</p>
+            <p class="fx-app-aviso" data-so-ios hidden>🍎 Você está num iPhone ou iPad: por enquanto o app é só para Android. Aqui pelo site a loja funciona normalmente.</p>
+
+            @if (!Model.Disponivel && Model.AmbienteDeDesenvolvimento)
+            {
+                @* Só aparece rodando no Visual Studio (ambiente Development), nunca para os clientes. *@
+                <p class="fx-app-aviso fx-app-aviso-equipe">
+                    🛠️ <strong>Para a equipe:</strong> coloque o arquivo do app em
+                    <code>@Model.CaminhoDoArquivo</code> (ou preencha "AppAndroid:LinkExterno" no appsettings.json)
+                    e atualize a página.
+                </p>
+            }
+        </div>
+
+        <partial name="_CelularApp" />
+    </div>
+</section>
+
+<section class="fx-pagina fx-app-detalhes">
+    <div class="container">
+        <h2 class="fx-subtitulo">Como instalar no celular Android</h2>
+        <ol class="fx-passos">
+            <li>
+                <strong>Baixe o app.</strong>
+                Toque em <em>Baixar o app para Android</em>. Se o navegador avisar que esse tipo de arquivo pode ser perigoso, toque em <em>Baixar mesmo assim</em>.
+            </li>
+            <li>
+                <strong>Abra o arquivo.</strong>
+                Quando o download terminar, toque em <em>Abrir</em>. Se o aviso sumir, procure o <em>FixTintas.apk</em> no app <em>Arquivos</em>, na pasta Downloads.
+            </li>
+            <li>
+                <strong>Permita a instalação.</strong>
+                Na primeira vez, o Android pede permissão para instalar apps baixados pelo navegador. Toque em <em>Configurações</em>, ative <em>Permitir desta fonte</em> e volte.
+            </li>
+            <li>
+                <strong>Instale e pronto.</strong>
+                Toque em <em>Instalar</em>. O FixTintas aparece junto com os outros apps do celular.
+            </li>
+        </ol>
+
+        <h2 class="fx-subtitulo">Dúvidas comuns</h2>
+        <div class="fx-duvidas">
+            <details>
+                <summary>Por que o celular mostra avisos na instalação?</summary>
+                <p>O app é instalado direto pelo arquivo, sem passar pela Play Store, então o Android pede a sua confirmação. Se aparecer um aviso do Play Protect, toque em <em>Mais detalhes</em> e depois em <em>Instalar mesmo assim</em>.</p>
+            </details>
+            <details>
+                <summary>Preciso de uma conta para usar o app?</summary>
+                <p>Não. Simular as cores, ver o catálogo e calcular a tinta funcionam sem conta. Para salvar projetos, favoritar cores e fazer pedidos, entre com a sua conta FixTintas ou crie uma no próprio app.</p>
+            </details>
+            <details>
+                <summary>Funciona no iPhone?</summary>
+                <p>Ainda não. Por enquanto o app é só para Android @Model.AndroidMinimo ou superior. No iPhone, use a loja aqui pelo site.</p>
+            </details>
+            <details>
+                <summary>Como atualizo o app?</summary>
+                <p>Baixe de novo nesta página e instale por cima. Se o celular disser <em>App não instalado</em>, desinstale a versão antiga e instale a nova.</p>
+            </details>
+        </div>
+
+        <p class="mt-4"><a class="fx-botao fx-botao-claro" asp-controller="Home" asp-action="Index">← Voltar para a loja</a></p>
+    </div>
+</section>

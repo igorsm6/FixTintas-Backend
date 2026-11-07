@@ -1,0 +1,1 @@
+﻿  BACKUP DATABASE FixTintasPIM TO DISK = 'C:\Temp\FixTintasPIM.bak' WITH INIT

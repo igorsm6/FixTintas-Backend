@@ -1,0 +1,40 @@
+@model VitrineViewModel
+@{
+    ViewData["Title"] = Model.Titulo;
+
+    var filtro = Model.Filtro;
+    var semFiltros = string.IsNullOrWhiteSpace(filtro.Termo) && string.IsNullOrWhiteSpace(filtro.Categoria)
+        && filtro.MarcaId is null && filtro.PrecoMin is null && filtro.PrecoMax is null;
+}
+
+@* O banner aparece na lista completa; com busca ou filtro, os produtos vêm direto. *@
+@if (semFiltros)
+{
+    <partial name="_Banner" />
+}
+
+<section class="produtos">
+    <div class="container">
+        <h2 id="titulo-pagina">@Model.Titulo</h2>
+        <p class="total-resultados">@Model.Itens.Count produto(s) encontrado(s)</p>
+
+        @if (Model.Itens.Count == 0)
+        {
+            <div class="nenhum-produto">
+                <p>Nenhum produto encontrado.</p>
+                <a class="fx-botao" asp-controller="Produtos" asp-action="Index">Ver todos os produtos</a>
+            </div>
+        }
+        else
+        {
+            <div class="grid-produtos" id="produtos-lista">
+                @foreach (var item in Model.Itens)
+                {
+                    <partial name="_CardProduto" model="item" />
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@await Component.InvokeAsync("ModalProduto")

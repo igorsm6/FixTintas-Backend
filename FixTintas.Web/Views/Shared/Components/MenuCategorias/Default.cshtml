@@ -1,0 +1,135 @@
+@model MenuCategoriasViewModel
+@*
+    Menu lateral do site original, agora com as categorias e marcas do banco.
+    Coluna 1: categorias principais (e "Marcas"). Coluna 2: as subcategorias da
+    categoria clicada (o site.js mostra a coluna certa). Cada subcategoria é um
+    link para /Produtos?categoria=slug, que filtra pela stored procedure.
+*@
+@{
+    var filtro = Model.Filtro;
+    var algumFiltro = !string.IsNullOrWhiteSpace(filtro.Termo) || filtro.PrecoMin is not null
+        || filtro.PrecoMax is not null || !string.IsNullOrWhiteSpace(filtro.Ordem)
+        || filtro.Categoria is not null || filtro.MarcaId is not null;
+}
+<aside class="sidebar-filtro" aria-label="Categorias">
+    <button type="button" class="sidebar-toggle-btn" id="sidebar-toggle" aria-expanded="false" aria-controls="sidebar-conteudo">
+        <span>☰ @(Model.MostrarFiltros ? "Categorias e Filtros" : "Categorias")</span>
+        <span class="seta-sidebar">▼</span>
+    </button>
+
+    <div class="sidebar-conteudo" id="sidebar-conteudo">
+        <div class="coluna-filtro coluna-1">
+            <h3>Categorias</h3>
+            <ul class="lista-categorias">
+                @foreach (var categoria in Model.Categorias)
+                {
+                    var coluna = $"cat-{categoria.Id}";
+                    <li class="categoria @(Model.ColunaAberta == coluna ? "ativo" : null)" data-coluna="@coluna" role="button" tabindex="0">
+                        @categoria.Nome<span class="seta">›</span>
+                    </li>
+                }
+                @if (Model.Marcas.Count > 0)
+                {
+                    <li class="categoria @(Model.ColunaAberta == "marcas" ? "ativo" : null)" data-coluna="marcas" role="button" tabindex="0">
+                        Marcas<span class="seta">›</span>
+                    </li>
+                }
+            </ul>
+
+            @if (Model.MostrarFiltros)
+            {
+                <hr class="separador-filtros" />
+                <h3>Filtros</h3>
+                @* Formulário GET: os filtros vão na URL e a página é montada de novo pelo servidor. *@
+                <form asp-area="" asp-controller="Produtos" asp-action="Index" method="get" id="form-filtros">
+                    @if (filtro.Categoria is not null)
+                    {
+                        <input type="hidden" name="categoria" value="@filtro.Categoria" />
+                    }
+                    @if (filtro.MarcaId is not null)
+                    {
+                        <input type="hidden" name="marcaId" value="@filtro.MarcaId" />
+                    }
+                    <div class="filtro-grupo">
+                        <label for="filtro-busca">Buscar</label>
+                        <input type="text" id="filtro-busca" name="termo" value="@filtro.Termo" maxlength="100" placeholder="Nome do produto..." />
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="preco-min">Faixa de preço (R$)</label>
+                        <div class="faixa-preco">
+                            <input type="number" id="preco-min" name="precoMin" value="@filtro.PrecoMin" min="0" step="any" placeholder="Mín" aria-label="Preço mínimo" />
+                            <span>—</span>
+                            <input type="number" id="preco-max" name="precoMax" value="@filtro.PrecoMax" min="0" step="any" placeholder="Máx" aria-label="Preço máximo" />
+                        </div>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="filtro-ordem">Ordenar por</label>
+                        <select id="filtro-ordem" name="ordem" data-enviar-ao-mudar>
+                            <option value="" selected="@(string.IsNullOrEmpty(filtro.Ordem))">Relevância</option>
+                            <option value="menor" selected="@(filtro.Ordem == "menor")">Menor preço</option>
+                            <option value="maior" selected="@(filtro.Ordem == "maior")">Maior preço</option>
+                            <option value="az" selected="@(filtro.Ordem == "az")">A-Z</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-filtrar">Aplicar filtros</button>
+                </form>
+                @if (algumFiltro)
+                {
+                    <a class="btn-voltar link-limpar" asp-area="" asp-controller="Produtos" asp-action="Index">✕ Limpar filtros</a>
+                }
+            }
+        </div>
+
+        @* Coluna 2: um painel para cada categoria principal e um para as marcas. *@
+        <div class="coluna-filtro coluna-2" id="coluna-2">
+            @foreach (var categoria in Model.Categorias)
+            {
+                var coluna = $"cat-{categoria.Id}";
+                <div class="painel-coluna" id="@coluna" hidden="@(Model.ColunaAberta != coluna)">
+                    <button type="button" class="btn-voltar" data-fechar-coluna>‹ Voltar</button>
+                    <h3>@categoria.Nome</h3>
+                    <ul class="lista-categorias">
+                        <li>
+                            <a class="categoria @(Model.CategoriaSelecionada == categoria.Slug ? "ativo" : null)"
+                               asp-area="" asp-controller="Produtos" asp-action="Index" asp-route-categoria="@categoria.Slug">
+                                Tudo em @categoria.Nome<span class="seta">›</span>
+                            </a>
+                        </li>
+                        @foreach (var sub in categoria.Subcategorias)
+                        {
+                            <li>
+                                <a class="categoria @(Model.CategoriaSelecionada == sub.Slug ? "ativo" : null)"
+                                   asp-area="" asp-controller="Produtos" asp-action="Index" asp-route-categoria="@sub.Slug">
+                                    @sub.Nome<span class="seta">›</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            @if (Model.Marcas.Count > 0)
+            {
+                <div class="painel-coluna" id="marcas" hidden="@(Model.ColunaAberta != "marcas")">
+                    <button type="button" class="btn-voltar" data-fechar-coluna>‹ Voltar</button>
+                    <h3>Marcas</h3>
+                    <ul class="lista-categorias">
+                        @foreach (var marca in Model.Marcas)
+                        {
+                            <li>
+                                <a class="categoria @(Model.MarcaSelecionada == marca.Id ? "ativo" : null)"
+                                   asp-area="" asp-controller="Produtos" asp-action="Index" asp-route-marcaId="@marca.Id">
+                                    @marca.Nome<span class="seta">›</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+</aside>
+@if (Model.ColunaAberta is not null)
+{
+    @* Já abre a coluna 2 da categoria escolhida, sem esperar o site.js (evita o "pulo" da página). *@
+    <script>document.body.classList.add('col-2-open');</script>
+}

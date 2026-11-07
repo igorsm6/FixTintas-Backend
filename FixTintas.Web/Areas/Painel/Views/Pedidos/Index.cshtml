@@ -1,0 +1,55 @@
+@model List<PedidoResumoDto>
+@{
+    ViewData["Title"] = "Pedidos";
+    var statusAtual = ViewData["Status"] as string;
+    var contagem = ViewData["Contagem"] as Dictionary<StatusPedido, int> ?? new Dictionary<StatusPedido, int>();
+    var todos = contagem.Values.Sum();
+}
+
+<div class="barra-topo">
+    <h1>Pedidos</h1>
+    <span class="sub">Pedidos do site e do aplicativo</span>
+</div>
+
+@* Abas por status: /Painel/Pedidos?status=Pendente *@
+<nav class="abas-status" aria-label="Filtrar por status">
+    <a class="aba-status @(string.IsNullOrEmpty(statusAtual) ? "ativo" : null)" asp-action="Index">Todos <span>@todos</span></a>
+    @foreach (var status in Enum.GetValues<StatusPedido>())
+    {
+        var nome = status.ToString();
+        <a class="aba-status @(string.Equals(statusAtual, nome, StringComparison.OrdinalIgnoreCase) ? "ativo" : null)"
+           asp-action="Index" asp-route-status="@nome">@nome <span>@(contagem.TryGetValue(status, out var total) ? total : 0)</span></a>
+    }
+</nav>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Pedido</th>
+                <th>Cliente</th>
+                <th>Itens</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="6" class="vazio">Nenhum pedido encontrado.</td></tr>
+            }
+            @foreach (var pedido in Model)
+            {
+                <tr>
+                    <td><strong>nº @pedido.Id</strong><span class="sub">@Formatacao.DataHora(pedido.CriadoEm)</span></td>
+                    <td>@pedido.ClienteNome<span class="sub">@pedido.ClienteEmail</span></td>
+                    <td>@pedido.QuantidadeItens</td>
+                    <td>@Formatacao.Moeda(pedido.Total)</td>
+                    <td><span class="badge status-@pedido.Status.ToLowerInvariant()">@pedido.Status</span></td>
+                    <td><a class="btn btn-secundario btn-sm" asp-action="Detalhes" asp-route-id="@pedido.Id">Abrir</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

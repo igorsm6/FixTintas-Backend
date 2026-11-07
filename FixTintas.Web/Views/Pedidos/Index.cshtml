@@ -1,0 +1,54 @@
+@model List<PedidoResumoDto>
+@{
+    ViewData["Title"] = "Meus pedidos";
+    ViewData["SemMenu"] = true;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <h1 class="fx-titulo">📦 Meus pedidos</h1>
+        <p class="text-muted">Os pedidos feitos pelo site e pelo aplicativo aparecem aqui.</p>
+
+        @if (Model.Count == 0)
+        {
+            <div class="fx-cartao fx-cartao-estreito text-center">
+                <p class="fs-5">Você ainda não fez nenhum pedido.</p>
+                <a class="fx-botao" asp-controller="Produtos" asp-action="Index">Ver produtos</a>
+            </div>
+        }
+        else
+        {
+            <div class="fx-cartao p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0 fx-tabela">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Data</th>
+                                <th>Itens</th>
+                                <th>Total</th>
+                                <th>Situação</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pedido in Model)
+                            {
+                                <tr>
+                                    <td><strong>nº @pedido.Id</strong></td>
+                                    <td>@Formatacao.DataHora(pedido.CriadoEm)</td>
+                                    <td>@pedido.QuantidadeItens</td>
+                                    <td>@Formatacao.Moeda(pedido.Total)</td>
+                                    <td><span class="fx-status status-@pedido.Status.ToLowerInvariant()">@pedido.Status</span></td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary" asp-action="Detalhes" asp-route-id="@pedido.Id">Ver detalhes</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</section>

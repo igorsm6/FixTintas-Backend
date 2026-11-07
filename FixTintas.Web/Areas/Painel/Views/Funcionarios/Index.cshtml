@@ -1,0 +1,83 @@
+@model List<FuncionarioDto>
+@{
+    ViewData["Title"] = "Funcionários";
+    var meuId = ViewData["MeuId"] as int?;
+    var senhaTemporaria = TempData["SenhaTemporaria"] as string;
+    var senhaPara = TempData["SenhaPara"] as string;
+}
+
+<div class="barra-topo">
+    <h1>Funcionários</h1>
+    <a class="btn btn-primario" asp-action="Criar">+ Novo funcionário</a>
+</div>
+
+@if (!string.IsNullOrEmpty(senhaTemporaria))
+{
+    @* Aparece UMA vez só (o TempData some depois de lido); a senha não fica guardada em texto. *@
+    <div class="aviso-senha" role="status">
+        <strong>@senhaPara</strong><br />
+        Senha temporária: <code>@senhaTemporaria</code> — entregue pessoalmente. Ela não será exibida novamente
+        e deverá ser trocada no primeiro acesso.
+    </div>
+}
+
+<p class="ajuda">
+    Funcionários só são criados aqui, pelo gerente. O funcionário cuida de produtos, estoque e pedidos;
+    o gerente também muda preços, exclui produtos e cuida do catálogo, dos cupons e da equipe.
+</p>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="5" class="vazio">Nenhum funcionário cadastrado.</td></tr>
+            }
+            @foreach (var f in Model)
+            {
+                var souEu = f.Id == meuId;
+                <tr>
+                    <td>
+                        <strong>@f.Nome</strong>
+                        <span class="sub">@(souEu ? "você" : "desde " + Formatacao.Data(f.DataCadastro))</span>
+                    </td>
+                    <td>@f.Email</td>
+                    <td>@Perfis.Rotulo(f.Perfil)</td>
+                    <td>
+                        <span class="badge @(f.Ativo ? "ok" : "inativo")">@(f.Ativo ? "Ativo" : "Desativado")</span>
+                        @if (f.TrocarSenha)
+                        {
+                            <span class="badge baixo">Senha temporária</span>
+                        }
+                    </td>
+                    <td>
+                        @if (souEu)
+                        {
+                            <span class="sub">Para trocar a sua senha, use "Alterar senha".</span>
+                        }
+                        else
+                        {
+                            <div class="acoes">
+                                <form asp-action="AlterarAtivo" asp-route-id="@f.Id" method="post"
+                                      data-confirmar="@(f.Ativo ? "Desativar" : "Reativar") o acesso de @(f.Nome)?">
+                                    <input type="hidden" name="ativo" value="@(f.Ativo ? "false" : "true")" />
+                                    <button type="submit" class="btn btn-sm @(f.Ativo ? "btn-perigo" : "btn-secundario")">@(f.Ativo ? "Desativar" : "Reativar")</button>
+                                </form>
+                                @if (f.Ativo)
+                                {
+                                    <form asp-action="RedefinirSenha" asp-route-id="@f.Id" method="post"
+                                          data-confirmar="Gerar uma nova senha temporária para @(f.Nome)? A senha atual deixa de funcionar.">
+                                        <button type="submit" class="btn btn-secundario btn-sm">Nova senha</button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

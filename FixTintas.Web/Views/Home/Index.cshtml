@@ -1,0 +1,54 @@
+@model InicioViewModel
+@{
+    ViewData["Title"] = "Início";
+}
+
+<partial name="_Banner" />
+
+<section id="produtos" class="produtos">
+    <div class="container">
+        <h2>Aproveite nossas melhores ofertas!</h2>
+
+        @* As ofertas são os produtos com preço "De" cadastrado no painel (maior desconto primeiro). *@
+        @if (Model.Ofertas.Count == 0)
+        {
+            <p class="nenhum-produto">Nenhuma oferta no momento.</p>
+        }
+        else
+        {
+            <div class="grid-produtos">
+                @foreach (var item in Model.Ofertas)
+                {
+                    <partial name="_CardProduto" model="item" />
+                }
+            </div>
+        }
+
+        <p class="ver-todos">
+            <a class="fx-botao" asp-controller="Produtos" asp-action="Index">Ver todos os produtos</a>
+        </p>
+    </div>
+</section>
+
+@* Faixa "Baixe o app" (app Flutter para Android): Views/Shared/_FaixaApp.cshtml *@
+<partial name="_FaixaApp" />
+
+<section id="sobre" class="sobre">
+    <div class="container">
+        <h2>Sobre Nós</h2>
+        <p>Somos uma loja especializada em tintas de qualidade, com os melhores produtos do mercado.</p>
+        <p>Nossa missão é garantir satisfação e excelência em cada venda.</p>
+    </div>
+</section>
+
+<section id="contato" class="contato">
+    <div class="container">
+        <h2>Entre em Contato</h2>
+        <p>Email: contato@fixtintas.com</p>
+        <p>Telefone: <img class="img-icon_whatsapp" src="~/img/whatsapp_3767236.png" alt="WhatsApp" data-esconder-se-faltar /> (16) 9999-9999</p>
+        <p>Endereço: Av Presidente Vargas, 123 - Ribeirão Preto, SP</p>
+    </div>
+</section>
+
+@* Janela "Adicionar ao carrinho" (ViewComponents/ModalProdutoViewComponent.cs) *@
+@await Component.InvokeAsync("ModalProduto")

@@ -1,0 +1,22 @@
+@model CorSalvarDto
+@{
+    ViewData["Title"] = "Editar cor";
+}
+
+<div class="barra-topo">
+    <h1>Editar cor</h1>
+    <a asp-action="Index">‹ Voltar para a lista</a>
+</div>
+
+@* O id vai na URL (/Painel/Cores/Editar/5), não dentro do formulário. *@
+<form asp-action="Editar" asp-route-id="@ViewData["Id"]" method="post" class="cartao-form">
+    <partial name="_Formulario" model="Model" />
+    <div class="modal-rodape">
+        <a class="btn btn-secundario" asp-action="Index">Cancelar</a>
+        <button type="submit" class="btn btn-primario">Salvar alterações</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

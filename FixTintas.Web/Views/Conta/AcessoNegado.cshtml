@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Acesso negado";
+    ViewData["SemMenu"] = true;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <div class="fx-cartao fx-cartao-estreito text-center">
+            <p class="fx-icone-grande" aria-hidden="true">🔒</p>
+            <h1 class="fx-titulo">Acesso negado</h1>
+            <p>A sua conta não tem permissão para abrir esta página.</p>
+            <p class="small text-muted">O painel da loja é só para funcionários e gerentes; algumas telas são só do gerente.</p>
+            <a class="fx-botao" asp-area="" asp-controller="Home" asp-action="Index">Voltar à loja</a>
+        </div>
+    </div>
+</section>

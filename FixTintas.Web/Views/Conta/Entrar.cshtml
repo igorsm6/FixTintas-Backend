@@ -1,0 +1,38 @@
+@model LoginDto
+@{
+    ViewData["Title"] = "Entrar";
+    ViewData["SemMenu"] = true;
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <div class="modal-box fx-conta">
+            <div class="modal-abas">
+                <a class="aba ativa" asp-action="Entrar" asp-route-returnUrl="@returnUrl" aria-current="page">Entrar</a>
+                <a class="aba" asp-action="Cadastrar" asp-route-returnUrl="@returnUrl">Cadastrar</a>
+            </div>
+
+            @* O e-mail e a senha são conferidos pelo UsuarioNegocio (o mesmo login do app). *@
+            <form class="form-modal" asp-action="Entrar" asp-route-returnUrl="@returnUrl" method="post">
+                <h2>Bem-vindo de volta!</h2>
+                <div asp-validation-summary="ModelOnly" class="fx-erros" role="alert"></div>
+
+                <label asp-for="Email" class="fx-rotulo"></label>
+                <input asp-for="Email" type="email" placeholder="seu@email.com" autocomplete="username" autofocus />
+                <span asp-validation-for="Email"></span>
+
+                <label asp-for="Senha" class="fx-rotulo"></label>
+                <input asp-for="Senha" type="password" placeholder="Sua senha" autocomplete="current-password" />
+                <span asp-validation-for="Senha"></span>
+
+                <button type="submit" class="btn-submit">Entrar</button>
+                <p class="link-form">Ainda não tem conta? <a asp-action="Cadastrar" asp-route-returnUrl="@returnUrl">Cadastre-se</a></p>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

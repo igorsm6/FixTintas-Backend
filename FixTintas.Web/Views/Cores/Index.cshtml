@@ -1,0 +1,86 @@
+@model CoresViewModel
+@*
+    Catálogo de cores (as mesmas do app) e as cores favoritas do cliente.
+    As favoritas são as mesmas no site e no app (tabela Favoritos).
+*@
+@{
+    ViewData["Title"] = Model.SoFavoritas ? "Cores favoritas" : "Cores";
+    ViewData["SemMenu"] = true;
+    var aquiMesmo = Context.Request.Path + Context.Request.QueryString;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <h1 class="fx-titulo">🎨 @(Model.SoFavoritas ? "Minhas cores favoritas" : "Catálogo de cores")</h1>
+        <p class="text-muted">
+            Escolha a cor ao adicionar uma tinta ao carrinho.
+            @if (Model.Logado)
+            {
+                <span>Toque no coração para guardar uma cor nas favoritas (elas também aparecem no app).</span>
+            }
+            else
+            {
+                <span><a asp-controller="Conta" asp-action="Entrar" asp-route-returnUrl="@aquiMesmo">Entre</a> para guardar as suas cores favoritas.</span>
+            }
+        </p>
+
+        @* Convite para o app: lá dá para ver a cor numa foto da própria parede. *@
+        <p class="fx-dica-app">
+            📱 Quer ver como a cor fica na sua parede? Teste no
+            <a asp-controller="App" asp-action="Index">app FixTintas para Android</a>.
+        </p>
+
+        @* Filtro por família de cor *@
+        <nav class="fx-familias" aria-label="Famílias de cor">
+            <a class="fx-chip @(Model.FamiliaAtual is null && !Model.SoFavoritas ? "ativo" : null)" asp-action="Index">Todas</a>
+            @foreach (var familia in Model.Familias)
+            {
+                <a class="fx-chip @(Model.FamiliaAtual == familia ? "ativo" : null)" asp-action="Index" asp-route-familia="@familia">@familia</a>
+            }
+            @if (Model.Logado)
+            {
+                <a class="fx-chip fx-chip-favoritas @(Model.SoFavoritas ? "ativo" : null)" asp-action="Index" asp-route-favoritas="true">❤️ Favoritas (@Model.Favoritas.Count)</a>
+            }
+        </nav>
+
+        @if (Model.Cores.Count == 0)
+        {
+            <div class="fx-cartao fx-cartao-estreito text-center">
+                @if (Model.SoFavoritas)
+                {
+                    <p class="fs-5">Você ainda não tem cores favoritas.</p>
+                    <a class="fx-botao" asp-action="Index">Ver todas as cores</a>
+                }
+                else
+                {
+                    <p class="fs-5">Nenhuma cor encontrada.</p>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="fx-grade-cores">
+                @foreach (var cor in Model.Cores)
+                {
+                    var favorita = Model.Favoritas.Contains(cor.Id);
+                    <div class="fx-cor">
+                        <div class="fx-cor-amostra" style="background:@cor.CodigoHex"></div>
+                        <div class="fx-cor-info">
+                            <strong>@cor.Nome</strong>
+                            <span>@(string.IsNullOrEmpty(cor.Familia) ? cor.CodigoHex : cor.CodigoHex + " · " + cor.Familia)</span>
+                        </div>
+                        @if (Model.Logado)
+                        {
+                            <form asp-action="@(favorita ? "Desfavoritar" : "Favoritar")" asp-route-id="@cor.Id" method="post">
+                                <input type="hidden" name="voltarPara" value="@aquiMesmo" />
+                                <button type="submit" class="fx-coracao @(favorita ? "ativo" : null)"
+                                        aria-pressed="@(favorita ? "true" : "false")"
+                                        title="@(favorita ? "Tirar das favoritas" : "Guardar nas favoritas")">@(favorita ? "❤️" : "🤍")</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

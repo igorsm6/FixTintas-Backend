@@ -1,0 +1,73 @@
+@model AtualizarPerfilDto
+@{
+    ViewData["Title"] = "Meus dados";
+    ViewData["SemMenu"] = true;
+    var perfil = ViewData["Perfil"] as PerfilDto;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <h1 class="fx-titulo">👤 Meus dados</h1>
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="fx-cartao">
+                    <h2 class="fx-subtitulo">Sua conta</h2>
+                    @if (perfil is not null)
+                    {
+                        <dl class="fx-dados">
+                            <dt>E-mail</dt>
+                            <dd>@perfil.Email</dd>
+                            <dt>Perfil</dt>
+                            <dd>@Perfis.Rotulo(perfil.Perfil)</dd>
+                            @if (!string.IsNullOrEmpty(perfil.Cpf))
+                            {
+                                <dt>CPF</dt>
+                                <dd>@perfil.Cpf</dd>
+                            }
+                            @if (perfil.Nascimento is DateOnly nascimento)
+                            {
+                                <dt>Nascimento</dt>
+                                <dd>@nascimento.ToString("dd/MM/yyyy")</dd>
+                            }
+                            <dt>Cliente desde</dt>
+                            <dd>@Formatacao.Data(perfil.CriadoEm)</dd>
+                        </dl>
+                        <p class="fx-dica">O e-mail, o CPF e a data de nascimento não podem ser alterados por aqui.</p>
+                    }
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="fx-botao fx-botao-claro" asp-action="AlterarSenha">🔑 Alterar senha</a>
+                        <a class="fx-botao fx-botao-claro" asp-controller="Pedidos" asp-action="Index">📦 Meus pedidos</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="fx-cartao">
+                    <h2 class="fx-subtitulo">Alterar nome e telefone</h2>
+                    <form asp-action="MeusDados" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Nome" class="form-label"></label>
+                            <input asp-for="Nome" class="form-control" autocomplete="name" />
+                            <span asp-validation-for="Nome" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Telefone" class="form-label"></label>
+                            <input asp-for="Telefone" type="tel" class="form-control" placeholder="(16) 99999-9999" data-mascara="telefone" autocomplete="tel" />
+                            <span asp-validation-for="Telefone" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="fx-botao">Salvar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

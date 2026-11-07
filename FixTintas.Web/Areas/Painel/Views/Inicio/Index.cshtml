@@ -1,0 +1,80 @@
+@model PainelInicioViewModel
+@{
+    ViewData["Title"] = "Início";
+}
+
+<div class="barra-topo">
+    <h1>Olá, @User.PrimeiroNome()!</h1>
+    <span class="sub">@Formatacao.DataHora(DateTime.Now)</span>
+</div>
+
+@* Os mesmos indicadores do admin.html original, agora calculados pelo banco. *@
+<section class="cards">
+    <a class="card" asp-controller="Produtos" asp-action="Index"><span>Produtos</span><strong>@Model.Resumo.Total</strong></a>
+    <a class="card" asp-controller="Produtos" asp-action="Index" asp-route-situacao="ativo"><span>Ativos na loja</span><strong>@Model.Resumo.Ativos</strong></a>
+    <a class="card alerta" asp-controller="Produtos" asp-action="Index" asp-route-situacao="baixo"><span>Estoque baixo</span><strong>@Model.Resumo.EstoqueBaixo</strong></a>
+    <a class="card perigo" asp-controller="Produtos" asp-action="Index" asp-route-situacao="zerado"><span>Sem estoque</span><strong>@Model.Resumo.SemEstoque</strong></a>
+    <a class="card alerta" asp-controller="Pedidos" asp-action="Index" asp-route-status="Pendente"><span>Pedidos pendentes</span><strong>@Model.Pedidos(StatusPedido.Pendente)</strong></a>
+    <a class="card" asp-controller="Pedidos" asp-action="Index" asp-route-status="Pago"><span>Pagos (para enviar)</span><strong>@Model.Pedidos(StatusPedido.Pago)</strong></a>
+    <div class="card"><span>Clientes cadastrados</span><strong>@Model.Clientes</strong></div>
+</section>
+
+<div class="duas-colunas">
+    <section>
+        <div class="barra-topo">
+            <h2>Pedidos para acompanhar</h2>
+            <a asp-controller="Pedidos" asp-action="Index">Ver todos ›</a>
+        </div>
+        <div class="tabela-wrap">
+            <table class="tabela-compacta">
+                <thead>
+                    <tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    @if (Model.PedidosEmAberto.Count == 0)
+                    {
+                        <tr><td colspan="4" class="vazio">Nenhum pedido pendente ou pago esperando envio.</td></tr>
+                    }
+                    @foreach (var pedido in Model.PedidosEmAberto)
+                    {
+                        <tr>
+                            <td><a asp-controller="Pedidos" asp-action="Detalhes" asp-route-id="@pedido.Id"><strong>nº @pedido.Id</strong></a><span class="sub">@Formatacao.DataHora(pedido.CriadoEm)</span></td>
+                            <td>@pedido.ClienteNome</td>
+                            <td>@Formatacao.Moeda(pedido.Total)</td>
+                            <td><span class="badge status-@pedido.Status.ToLowerInvariant()">@pedido.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <div class="barra-topo">
+            <h2>Estoque baixo</h2>
+            <a asp-controller="Produtos" asp-action="Estoque">Ir para o estoque ›</a>
+        </div>
+        <div class="tabela-wrap">
+            <table class="tabela-compacta">
+                <thead>
+                    <tr><th>Produto</th><th>Mínimo</th><th>Estoque</th></tr>
+                </thead>
+                <tbody>
+                    @if (Model.EstoqueBaixo.Count == 0)
+                    {
+                        <tr><td colspan="3" class="vazio">Nenhum produto com estoque baixo. 👍</td></tr>
+                    }
+                    @foreach (var produto in Model.EstoqueBaixo)
+                    {
+                        var situacao = ProdutoDto.SituacaoDoEstoque(produto.Estoque, produto.EstoqueMinimo);
+                        <tr class="linha-@situacao">
+                            <td><strong>@produto.Nome</strong><span class="sub">@produto.Rotulo · @produto.Sku</span></td>
+                            <td>@produto.EstoqueMinimo</td>
+                            <td><span class="badge @situacao">@produto.Estoque un.</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

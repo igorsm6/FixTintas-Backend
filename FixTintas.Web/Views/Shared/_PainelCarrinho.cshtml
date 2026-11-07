@@ -1,0 +1,68 @@
+@model ResumoCarrinho
+@*
+    Painel lateral do carrinho (abre pelo botão 🛒 do menu).
+    Os valores vêm do PedidoNegocio (CarrinhoDaSessao.Resumo), nunca do navegador.
+*@
+@{
+    var abrir = ViewData["AbrirCarrinho"] is true;
+    var aquiMesmo = HttpMethods.IsGet(Context.Request.Method)
+        ? Context.Request.Path + Context.Request.QueryString
+        : "/";
+    var orcamento = Model.Orcamento;
+}
+<div id="painel-carrinho" class="carrinho-overlay" hidden="@(!abrir)">
+    <div class="carrinho-box" role="dialog" aria-modal="true" aria-labelledby="titulo-carrinho">
+        <div class="carrinho-header">
+            <h2 id="titulo-carrinho">🛒 Meu Carrinho</h2>
+            <button type="button" class="modal-fechar" data-fechar-carrinho aria-label="Fechar o carrinho">✕</button>
+        </div>
+
+        <div id="carrinho-lista">
+            @if (Model.Vazio || orcamento is null)
+            {
+                <p class="carrinho-vazio">Carrinho vazio</p>
+            }
+            else
+            {
+                foreach (var item in orcamento.Itens)
+                {
+                    <div class="carrinho-item">
+                        <span>
+                            @item.ProdutoDescricao × @item.Quantidade
+                            @if (item.EhTinta)
+                            {
+                                <small class="carrinho-cor"><i class="bolinha-cor" style="background:@item.CorHex"></i>@item.CorNome</small>
+                            }
+                        </span>
+                        <span>@Formatacao.Moeda(item.Total)</span>
+                        <form asp-area="" asp-controller="Carrinho" asp-action="Remover" method="post">
+                            <input type="hidden" name="produtoId" value="@item.ProdutoId" />
+                            @if (item.EhTinta)
+                            {
+                                <input type="hidden" name="corId" value="@item.CorId" />
+                            }
+                            <input type="hidden" name="voltarPara" value="@aquiMesmo" />
+                            <button type="submit" title="Remover" aria-label="Remover @item.ProdutoDescricao">✕</button>
+                        </form>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="carrinho-rodape">
+            @if (orcamento is not null && orcamento.DescontoVolume + orcamento.DescontoCupom > 0)
+            {
+                <div class="carrinho-descontos">Descontos: − @Formatacao.Moeda(orcamento.DescontoVolume + orcamento.DescontoCupom)</div>
+            }
+            <div class="carrinho-total" id="carrinho-total">Total: @Formatacao.Moeda(orcamento?.Total ?? 0m)</div>
+            @if (Model.Vazio)
+            {
+                <a class="btn-finalizar" asp-area="" asp-controller="Produtos" asp-action="Index">Ver produtos</a>
+            }
+            else
+            {
+                <a class="btn-finalizar" asp-area="" asp-controller="Carrinho" asp-action="Index">Finalizar Compra</a>
+            }
+        </div>
+    </div>
+</div>

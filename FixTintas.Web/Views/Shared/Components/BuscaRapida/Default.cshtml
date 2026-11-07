@@ -1,0 +1,6 @@
+@model List<SugestaoBuscaDto>
+@*
+    Lista de produtos para as sugestões da busca do cabeçalho (o site.js lê este JSON).
+    O JsonSerializer troca < > & por <... então o texto não consegue fechar a tag <script>.
+*@
+<script type="application/json" id="dados-busca">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(s => new { nome = s.Nome, sub = s.Sub })))</script>

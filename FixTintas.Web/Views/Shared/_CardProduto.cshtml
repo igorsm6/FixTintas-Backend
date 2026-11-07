@@ -1,0 +1,75 @@
+@model VitrineItemDto
+@*
+    Um card da vitrine (página inicial e página de produtos).
+    As latas da mesma linha (900 ml, 3,6 L, 18 L) viram um card só; os dados das
+    opções vão no atributo data-produto, que o site.js lê para abrir a janela
+    "Adicionar ao carrinho". Os preços daqui só servem para MOSTRAR: o valor
+    cobrado é sempre recalculado pelo PedidoNegocio.
+*@
+@{
+    var barata = Model.MaisBarata;
+    var variasOpcoes = Model.Variacoes.Count > 1;
+    var dados = System.Text.Json.JsonSerializer.Serialize(new
+    {
+        titulo = Model.Titulo,
+        descricao = Model.Descricao,
+        imagem = Model.ImagemUrl,
+        categoria = Model.CategoriaNome,
+        marca = Model.MarcaNome,
+        acabamento = Model.Acabamento,
+        ehTinta = Model.EhTinta,
+        variacoes = Model.Variacoes.Select(v => new
+        {
+            id = v.ProdutoId,
+            rotulo = v.Rotulo,
+            preco = v.Preco,
+            precoDe = v.PrecoDe,
+            estoque = v.Estoque
+        })
+    });
+}
+<div class="produto" data-produto="@dados">
+    <div class="produto-imagem">
+        @if (!string.IsNullOrWhiteSpace(Model.ImagemUrl))
+        {
+            <img src="@Model.ImagemUrl" alt="@Model.Titulo" loading="lazy" data-sem-imagem="@Model.CategoriaNome" />
+        }
+        else
+        {
+            @Model.CategoriaNome
+        }
+    </div>
+    <h3>@Model.Titulo</h3>
+    @if (!string.IsNullOrEmpty(Model.MarcaNome))
+    {
+        <p class="produto-marca">@(Model.Acabamento is null ? Model.MarcaNome : Model.MarcaNome + " · " + Model.Acabamento)</p>
+    }
+    @if (!string.IsNullOrEmpty(Model.Descricao))
+    {
+        <p>@Model.Descricao</p>
+    }
+    @if (barata?.PrecoDe is decimal precoDe)
+    {
+        <div class="preco-normal">De <s>@Formatacao.Moeda(precoDe)</s></div>
+        <b>Por</b>
+    }
+    <p class="preco">
+        @if (variasOpcoes)
+        {
+            <small class="a-partir">a partir de</small>
+        }
+        @Formatacao.Moeda(barata?.Preco ?? 0m)
+    </p>
+    @if (variasOpcoes)
+    {
+        <p class="produto-opcoes">@(string.Join(" · ", Model.Variacoes.Select(v => v.Rotulo)))</p>
+    }
+    @if (Model.EmEstoque)
+    {
+        <button type="button" data-abrir-produto>Adicionar ao Carrinho</button>
+    }
+    else
+    {
+        <button type="button" disabled>Esgotado</button>
+    }
+</div>

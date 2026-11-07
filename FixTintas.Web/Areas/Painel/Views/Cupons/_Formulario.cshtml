@@ -1,0 +1,52 @@
+@model CupomSalvarDto
+@* Partial view: os campos do cupom, usados em Criar e em Editar. *@
+
+<div asp-validation-summary="ModelOnly" class="alerta erro" role="alert"></div>
+
+<div class="grid-form">
+    <div class="campo">
+        <label asp-for="Codigo"></label>
+        <input asp-for="Codigo" class="maiusculas" placeholder="Ex.: BEMVINDO10" autocomplete="off" />
+        <span asp-validation-for="Codigo" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="Tipo"></label>
+        <select asp-for="Tipo">
+            <option value="@nameof(TipoDesconto.Percentual)">Porcentagem (%)</option>
+            <option value="@nameof(TipoDesconto.ValorFixo)">Valor fixo (R$)</option>
+        </select>
+        <span asp-validation-for="Tipo" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="Valor"></label>
+        <input asp-for="Valor" type="number" step="any" min="0.01" />
+        <p class="ajuda">10 = 10% (porcentagem) ou R$ 10,00 (valor fixo).</p>
+        <span asp-validation-for="Valor" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="ValorMinimoPedido"></label>
+        <input asp-for="ValorMinimoPedido" type="number" step="any" min="0" />
+        <p class="ajuda">0 = vale para qualquer valor.</p>
+        <span asp-validation-for="ValorMinimoPedido" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label for="ValidoAte">@Html.DisplayNameFor(m => m.ValidoAte)</label>
+        <input type="date" id="ValidoAte" name="ValidoAte" value="@(Model.ValidoAte?.ToString("yyyy-MM-dd"))" />
+        <p class="ajuda">Vazio = sem prazo. O cupom vale até o fim desse dia.</p>
+        <span asp-validation-for="ValidoAte" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="UsosMaximos"></label>
+        <input asp-for="UsosMaximos" type="number" step="1" min="1" placeholder="Vazio = sem limite" />
+        <span asp-validation-for="UsosMaximos" class="erro"></span>
+    </div>
+
+    <div class="campo span2">
+        <label class="check"><input asp-for="Inativo" /> @Html.DisplayNameFor(m => m.Inativo)</label>
+    </div>
+</div>

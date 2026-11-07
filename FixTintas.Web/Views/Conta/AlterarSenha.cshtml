@@ -1,0 +1,65 @@
+@model AlterarSenhaDto
+@{
+    ViewData["Title"] = "Alterar senha";
+    ViewData["SemMenu"] = true;
+    var obrigatoria = User.PrecisaTrocarSenha();
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <div class="modal-box fx-conta">
+            @* Os mesmos controles servem para a troca normal e para a troca obrigatória
+               (funcionário que entrou com a senha temporária criada pelo gerente). *@
+            <form class="form-modal" asp-action="AlterarSenha" method="post">
+                <h2>@(obrigatoria ? "Crie a sua senha" : "Alterar senha")</h2>
+
+                @if (obrigatoria)
+                {
+                    <p class="fx-aviso-senha">
+                        Você entrou com uma <strong>senha temporária</strong>. Para continuar, crie uma senha só sua.
+                    </p>
+                }
+
+                <div asp-validation-summary="ModelOnly" class="fx-erros" role="alert"></div>
+
+                <label asp-for="SenhaAtual" class="fx-rotulo">@(obrigatoria ? "Senha temporária" : "Senha atual")</label>
+                <input asp-for="SenhaAtual" type="password" autocomplete="current-password" autofocus />
+                <span asp-validation-for="SenhaAtual"></span>
+
+                <label asp-for="NovaSenha" class="fx-rotulo"></label>
+                <input asp-for="NovaSenha" type="password" aria-describedby="regras-NovaSenha" autocomplete="new-password" />
+                <span asp-validation-for="NovaSenha"></span>
+                <div class="fx-regras-senha" data-regras-senha="NovaSenha" id="regras-NovaSenha" role="note">
+                    <strong>A senha precisa ter:</strong>
+                    <ul>
+                        <li data-regra="tamanho">No mínimo 8 caracteres</li>
+                        <li data-regra="letra">Pelo menos uma letra</li>
+                        <li data-regra="numero">Pelo menos um número</li>
+                    </ul>
+                </div>
+
+                <label asp-for="ConfirmarNovaSenha" class="fx-rotulo"></label>
+                <input asp-for="ConfirmarNovaSenha" type="password" autocomplete="new-password"
+                       data-val-required="Confirme a nova senha." data-val-equalto="As senhas não conferem." data-val-equalto-other="*.NovaSenha" />
+                <span asp-validation-for="ConfirmarNovaSenha"></span>
+
+                <button type="submit" class="btn-submit">Salvar nova senha</button>
+            </form>
+
+            @if (obrigatoria)
+            {
+                <form asp-action="Sair" method="post" class="text-center mt-3">
+                    <button type="submit" class="btn btn-link">Sair</button>
+                </form>
+            }
+            else
+            {
+                <p class="link-form"><a asp-action="MeusDados">‹ Voltar para Meus dados</a></p>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

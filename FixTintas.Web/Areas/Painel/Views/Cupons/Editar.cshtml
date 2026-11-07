@@ -1,0 +1,27 @@
+@model CupomSalvarDto
+@{
+    ViewData["Title"] = "Editar cupom";
+}
+
+<div class="barra-topo">
+    <h1>Editar cupom</h1>
+    <a asp-action="Index">‹ Voltar para a lista</a>
+</div>
+
+@if (ViewData["UsosRealizados"] is int usos)
+{
+    <p class="ajuda">Este cupom já foi usado em <strong>@usos</strong> pedido(s).</p>
+}
+
+@* O id vai na URL (/Painel/Cupons/Editar/5), não dentro do formulário. *@
+<form asp-action="Editar" asp-route-id="@ViewData["Id"]" method="post" class="cartao-form">
+    <partial name="_Formulario" model="Model" />
+    <div class="modal-rodape">
+        <a class="btn btn-secundario" asp-action="Index">Cancelar</a>
+        <button type="submit" class="btn btn-primario">Salvar alterações</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

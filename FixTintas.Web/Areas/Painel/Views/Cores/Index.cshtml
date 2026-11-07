@@ -1,0 +1,46 @@
+@model List<CorDto>
+@{
+    ViewData["Title"] = "Cores";
+}
+
+<div class="barra-topo">
+    <h1>Cores</h1>
+    <a class="btn btn-primario" asp-action="Criar">+ Nova cor</a>
+</div>
+
+<p class="ajuda">
+    As cores que o cliente escolhe ao comprar uma tinta (no site e no app) e que o simulador do app usa
+    para pintar a parede. Cor já vendida (ou usada num projeto do app) não é apagada: fica inativa.
+</p>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr><th>Cor</th><th>Código</th><th>Família</th><th>Pantone</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="6" class="vazio">Nenhuma cor cadastrada.</td></tr>
+            }
+            @foreach (var cor in Model)
+            {
+                <tr>
+                    <td><span class="cor-linha"><i class="amostra-cor" style="background:@cor.CodigoHex"></i><strong>@cor.Nome</strong></span></td>
+                    <td><code>@cor.CodigoHex</code><span class="sub">RGB @cor.Rgb.R, @cor.Rgb.G, @cor.Rgb.B</span></td>
+                    <td>@cor.Familia</td>
+                    <td>@cor.CodigoPantone</td>
+                    <td><span class="badge @(cor.Inativa ? "inativo" : "ok")">@(cor.Inativa ? "Inativa" : "Ativa")</span></td>
+                    <td>
+                        <div class="acoes">
+                            <a class="btn btn-secundario btn-sm" asp-action="Editar" asp-route-id="@cor.Id">Editar</a>
+                            <form asp-action="Excluir" asp-route-id="@cor.Id" method="post" data-confirmar="Excluir a cor &quot;@cor.Nome&quot;?">
+                                <button type="submit" class="btn btn-perigo btn-sm">Excluir</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

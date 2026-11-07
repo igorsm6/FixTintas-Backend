@@ -1,0 +1,79 @@
+@model CadastroClienteDto
+@{
+    ViewData["Title"] = "Criar conta";
+    ViewData["SemMenu"] = true;
+    var returnUrl = ViewData["ReturnUrl"] as string;
+
+    // Só maiores de 18 anos (o UsuarioNegocio confere de novo no servidor).
+    var nascimentoMaximo = DateTime.Today.AddYears(-18).ToString("yyyy-MM-dd");
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <div class="modal-box fx-conta">
+            <div class="modal-abas">
+                <a class="aba" asp-action="Entrar" asp-route-returnUrl="@returnUrl">Entrar</a>
+                <a class="aba ativa" asp-action="Cadastrar" asp-route-returnUrl="@returnUrl" aria-current="page">Cadastrar</a>
+            </div>
+
+            @*
+                No site todos os campos são obrigatórios (o controller chama o Negocio com
+                exigirDadosPessoais: true). No app, CPF, nascimento e telefone são opcionais.
+            *@
+            <form class="form-modal" asp-action="Cadastrar" asp-route-returnUrl="@returnUrl" method="post">
+                <h2>Crie sua conta</h2>
+                <div asp-validation-summary="ModelOnly" class="fx-erros" role="alert"></div>
+
+                <label asp-for="Nome" class="fx-rotulo"></label>
+                <input asp-for="Nome" placeholder="Nome e sobrenome" autocomplete="name" />
+                <span asp-validation-for="Nome"></span>
+
+                <label asp-for="Cpf" class="fx-rotulo"></label>
+                <input asp-for="Cpf" placeholder="000.000.000-00" inputmode="numeric" data-mascara="cpf"
+                       data-val-required="Informe o CPF." />
+                <span asp-validation-for="Cpf"></span>
+
+                <label for="Nascimento" class="fx-rotulo">Data de nascimento</label>
+                <input type="date" id="Nascimento" name="Nascimento" value="@(Model.Nascimento?.ToString("yyyy-MM-dd"))"
+                       max="@nascimentoMaximo" min="1900-01-01" autocomplete="bday"
+                       data-val="true" data-val-required="Informe sua data de nascimento."
+                       data-msg-max="Você precisa ter pelo menos 18 anos para se cadastrar."
+                       data-msg-min="Informe uma data de nascimento válida." />
+                <span asp-validation-for="Nascimento"></span>
+
+                <label asp-for="Telefone" class="fx-rotulo"></label>
+                <input asp-for="Telefone" type="tel" placeholder="(16) 99999-9999" autocomplete="tel" data-mascara="telefone"
+                       data-val-required="Informe o telefone." />
+                <span asp-validation-for="Telefone"></span>
+
+                <label asp-for="Email" class="fx-rotulo"></label>
+                <input asp-for="Email" type="email" placeholder="seu@email.com" autocomplete="email" />
+                <span asp-validation-for="Email"></span>
+
+                <label asp-for="Senha" class="fx-rotulo"></label>
+                <input asp-for="Senha" type="password" aria-describedby="regras-Senha" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" />
+                <span asp-validation-for="Senha"></span>
+                <div class="fx-regras-senha" data-regras-senha="Senha" id="regras-Senha" role="note">
+                    <strong>A senha precisa ter:</strong>
+                    <ul>
+                        <li data-regra="tamanho">No mínimo 8 caracteres</li>
+                        <li data-regra="letra">Pelo menos uma letra</li>
+                        <li data-regra="numero">Pelo menos um número</li>
+                    </ul>
+                </div>
+
+                <label asp-for="ConfirmarSenha" class="fx-rotulo"></label>
+                <input asp-for="ConfirmarSenha" type="password" placeholder="Repita a senha" autocomplete="new-password"
+                       data-val-required="Confirme a senha." data-val-equalto="As senhas não conferem." data-val-equalto-other="*.Senha" />
+                <span asp-validation-for="ConfirmarSenha"></span>
+
+                <button type="submit" class="btn-submit">Cadastrar</button>
+                <p class="link-form">Já tem conta? <a asp-action="Entrar" asp-route-returnUrl="@returnUrl">Entrar</a></p>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

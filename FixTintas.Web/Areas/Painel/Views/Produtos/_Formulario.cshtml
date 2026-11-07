@@ -1,0 +1,153 @@
+@model ProdutoSalvarDto
+@*
+    Partial view: os campos do produto, usados em Criar e em Editar (como o
+    _Formulario do ClientesController do professor).
+    Tinta     = escolha o tipo de tinta, a marca e o volume (o cliente escolhe a cor na compra).
+    Acessório = deixe "Tipo de tinta" vazio; o tamanho é opcional.
+*@
+@{
+    var editando = ViewData["Id"] is int;
+    var ehGerente = ViewData["EhGerente"] is true;
+    var precoTravado = editando && !ehGerente;
+    var imagemAtual = ViewData["ImagemAtual"] as string;
+}
+
+<div asp-validation-summary="ModelOnly" class="alerta erro" role="alert"></div>
+
+<div class="grid-form">
+    <div class="campo span2">
+        <label asp-for="TipoTintaId"></label>
+        <select asp-for="TipoTintaId" asp-items="@((SelectList)ViewData["TiposTinta"]!)" data-tipo-produto>
+            <option value="">— Não é tinta (ferramenta, acessório...) —</option>
+        </select>
+        <p class="ajuda">É o tipo de tinta que define o rendimento usado pela calculadora do app.</p>
+    </div>
+
+    <div class="campo span2">
+        <label asp-for="Nome"></label>
+        <input asp-for="Nome" />
+        <p class="ajuda" data-so-tinta>
+            Pode deixar vazio: o sistema usa "Marca Tipo Acabamento". Dê o <strong>mesmo nome</strong> às latas da
+            mesma linha (900 ml, 3,6 L, 18 L) e não ponha o volume no nome: elas viram um card só na loja.
+        </p>
+        <span asp-validation-for="Nome" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="CategoriaId"></label>
+        <select asp-for="CategoriaId" asp-items="@((SelectList)ViewData["Categorias"]!)">
+            <option value="">Escolha...</option>
+        </select>
+        <span asp-validation-for="CategoriaId" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="MarcaId"></label>
+        <select asp-for="MarcaId" asp-items="@((SelectList)ViewData["Marcas"]!)">
+            <option value="">— Sem marca —</option>
+        </select>
+        <span asp-validation-for="MarcaId" class="erro"></span>
+    </div>
+
+    <div class="campo" data-so-tinta>
+        <label asp-for="VolumeLitros"></label>
+        <input asp-for="VolumeLitros" type="number" step="any" min="0.1" max="50" placeholder="Ex.: 0.9, 3.6 ou 18" />
+        <span asp-validation-for="VolumeLitros" class="erro"></span>
+    </div>
+
+    <div class="campo" data-so-acessorio>
+        <label asp-for="Tamanho"></label>
+        <input asp-for="Tamanho" placeholder="Ex.: 23 cm, 5 degraus, 3/4&quot;" />
+        <span asp-validation-for="Tamanho" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="Sku"></label>
+        <input asp-for="Sku" placeholder="Vazio = gerado pelo sistema" class="maiusculas" />
+        <span asp-validation-for="Sku" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="EstoqueMinimo"></label>
+        <input asp-for="EstoqueMinimo" type="number" min="0" step="1" />
+        <span asp-validation-for="EstoqueMinimo" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="Preco"></label>
+        <input asp-for="Preco" type="number" step="any" min="0.01" readonly="@precoTravado" />
+        <span asp-validation-for="Preco" class="erro"></span>
+    </div>
+
+    <div class="campo">
+        <label asp-for="PrecoDe"></label>
+        <input asp-for="PrecoDe" type="number" step="any" min="0.01" readonly="@precoTravado" />
+        <span asp-validation-for="PrecoDe" class="erro"></span>
+    </div>
+
+    <div class="campo span2">
+        @if (precoTravado)
+        {
+            <p class="ajuda">🔒 Apenas o gerente pode alterar o preço de um produto já cadastrado.</p>
+        }
+        else
+        {
+            <p class="ajuda">Com o preço "De" preenchido (maior que o preço), o produto aparece nas ofertas da página inicial, com o preço antigo riscado.</p>
+        }
+    </div>
+
+    @if (editando)
+    {
+        @* O estoque muda só na tela de Estoque (e sozinho, a cada venda). *@
+        <div class="campo">
+            <label>Quantidade em estoque</label>
+            <input type="hidden" asp-for="Estoque" />
+            <p class="valor-fixo">@ViewData["EstoqueAtual"] un. · <a asp-action="Estoque">alterar na tela de estoque</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="campo">
+            <label asp-for="Estoque"></label>
+            <input asp-for="Estoque" type="number" min="0" step="1" />
+            <span asp-validation-for="Estoque" class="erro"></span>
+        </div>
+    }
+
+    <div class="campo span2">
+        <label asp-for="Descricao"></label>
+        <textarea asp-for="Descricao" rows="3"></textarea>
+        <span asp-validation-for="Descricao" class="erro"></span>
+    </div>
+
+    <div class="campo span2">
+        <label for="arquivo-imagem">Imagem do produto</label>
+        <div class="upload">
+            <div class="preview" id="preview-imagem">
+                @if (!string.IsNullOrWhiteSpace(imagemAtual))
+                {
+                    <img src="@imagemAtual" alt="Imagem atual" />
+                }
+                else
+                {
+                    <span>Sem imagem</span>
+                }
+            </div>
+            <div class="upload-campos">
+                <input type="file" name="imagem" id="arquivo-imagem" accept="image/png,image/jpeg,image/webp" data-preview="preview-imagem" />
+                <p class="ajuda">PNG, JPG ou WEBP, até 2 MB.</p>
+                @if (editando && !string.IsNullOrWhiteSpace(imagemAtual))
+                {
+                    <label class="check"><input type="checkbox" name="removerImagem" value="true" /> Remover a imagem atual</label>
+                }
+                <label asp-for="ImagemUrl">Ou o endereço de uma imagem (opcional)</label>
+                <input asp-for="ImagemUrl" placeholder="/img/minha-tinta.png ou https://..." />
+                <span asp-validation-for="ImagemUrl" class="erro"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="campo span2">
+        <label class="check"><input asp-for="Inativo" /> @Html.DisplayNameFor(m => m.Inativo)</label>
+    </div>
+</div>

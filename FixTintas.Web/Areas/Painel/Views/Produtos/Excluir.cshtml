@@ -1,0 +1,41 @@
+@model ProdutoDto
+@{
+    ViewData["Title"] = "Excluir produto";
+}
+
+<div class="barra-topo">
+    <h1>Excluir produto</h1>
+    <a asp-action="Index">‹ Voltar para a lista</a>
+</div>
+
+<div class="cartao-form">
+    <div class="alerta aviso">
+        Tem certeza de que deseja excluir este produto? Se ele já foi vendido, ele <strong>não é apagado</strong>:
+        fica desativado (some da loja e do app), para os pedidos antigos continuarem certos.
+    </div>
+
+    <dl class="detalhes">
+        <dt>Produto</dt>
+        <dd>@Model.Nome (@Model.Rotulo)</dd>
+        <dt>Código (SKU)</dt>
+        <dd>@Model.Sku</dd>
+        <dt>Categoria</dt>
+        <dd>@Model.CategoriaNome</dd>
+        @if (!string.IsNullOrEmpty(Model.MarcaNome))
+        {
+            <dt>Marca</dt>
+            <dd>@Model.MarcaNome</dd>
+        }
+        <dt>Preço</dt>
+        <dd>@Formatacao.Moeda(Model.Preco)</dd>
+        <dt>Estoque</dt>
+        <dd>@Model.Estoque un.</dd>
+        <dt>Cadastrado em</dt>
+        <dd>@Formatacao.DataHora(Model.DataCadastro)</dd>
+    </dl>
+
+    <form asp-action="Excluir" asp-route-id="@Model.Id" method="post" class="modal-rodape">
+        <a class="btn btn-secundario" asp-action="Index">Cancelar</a>
+        <button type="submit" class="btn btn-perigo">Excluir</button>
+    </form>
+</div>

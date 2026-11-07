@@ -1,0 +1,50 @@
+@model List<CupomDto>
+@{
+    ViewData["Title"] = "Cupons";
+}
+
+<div class="barra-topo">
+    <h1>Cupons de desconto</h1>
+    <a class="btn btn-primario" asp-action="Criar">+ Novo cupom</a>
+</div>
+
+<p class="ajuda">
+    Valem no site e no app. O desconto do cupom é calculado depois do desconto por volume.
+    Cupom já usado em pedidos não é apagado: fica inativo.
+</p>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr><th>Código</th><th>Desconto</th><th>Pedido mínimo</th><th>Válido até</th><th>Usos</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="7" class="vazio">Nenhum cupom cadastrado.</td></tr>
+            }
+            @foreach (var c in Model)
+            {
+                var vencido = c.ValidoAte is DateTime validade && DateTime.Now >= validade.Date.AddDays(1);
+                var esgotado = c.UsosMaximos is int maximo && c.UsosRealizados >= maximo;
+                var situacao = c.Inativo ? "Inativo" : vencido ? "Expirado" : esgotado ? "Esgotado" : "Ativo";
+                <tr>
+                    <td><code class="codigo-cupom">@c.Codigo</code></td>
+                    <td>@c.ValorTexto</td>
+                    <td>@(c.ValorMinimoPedido > 0 ? Formatacao.Moeda(c.ValorMinimoPedido) : "—")</td>
+                    <td>@(c.ValidoAte is DateTime ate ? Formatacao.Data(ate) : "Sem prazo")</td>
+                    <td>@(c.UsosMaximos is int limite ? $"{c.UsosRealizados} de {limite}" : c.UsosRealizados.ToString())</td>
+                    <td><span class="badge @(situacao == "Ativo" ? "ok" : "inativo")">@situacao</span></td>
+                    <td>
+                        <div class="acoes">
+                            <a class="btn btn-secundario btn-sm" asp-action="Editar" asp-route-id="@c.Id">Editar</a>
+                            <form asp-action="Excluir" asp-route-id="@c.Id" method="post" data-confirmar="Excluir o cupom @(c.Codigo)?">
+                                <button type="submit" class="btn btn-perigo btn-sm">Excluir</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

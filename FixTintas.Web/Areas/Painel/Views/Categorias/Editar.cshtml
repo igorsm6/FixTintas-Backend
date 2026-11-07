@@ -1,0 +1,21 @@
+@model CategoriaSalvarDto
+@{
+    ViewData["Title"] = "Editar categoria";
+}
+
+<div class="barra-topo">
+    <h1>Editar categoria</h1>
+    <a asp-action="Index">‹ Voltar para a lista</a>
+</div>
+
+<form asp-action="Editar" asp-route-id="@ViewData["Id"]" method="post" class="cartao-form">
+    <partial name="_Formulario" model="Model" />
+    <div class="modal-rodape">
+        <a class="btn btn-secundario" asp-action="Index">Cancelar</a>
+        <button type="submit" class="btn btn-primario">Salvar alterações</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

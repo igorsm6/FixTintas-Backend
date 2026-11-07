@@ -1,0 +1,22 @@
+@model ProdutoSalvarDto
+@{
+    ViewData["Title"] = "Novo produto";
+}
+
+<div class="barra-topo">
+    <h1>Novo produto</h1>
+    <a asp-action="Index">‹ Voltar para a lista</a>
+</div>
+
+@* enctype="multipart/form-data": necessário para o formulário enviar o arquivo da imagem. *@
+<form asp-action="Criar" method="post" enctype="multipart/form-data" class="cartao-form" data-formulario-produto>
+    <partial name="_Formulario" model="Model" />
+    <div class="modal-rodape">
+        <a class="btn btn-secundario" asp-action="Index">Cancelar</a>
+        <button type="submit" class="btn btn-primario">Salvar produto</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,46 @@
+@model List<TipoTintaDto>
+@{
+    ViewData["Title"] = "Tipos de tinta";
+}
+
+<div class="barra-topo">
+    <h1>Tipos de tinta</h1>
+    <a class="btn btn-primario" asp-action="Criar">+ Novo tipo</a>
+</div>
+
+<p class="ajuda">
+    O rendimento e as demãos são usados pela calculadora de tinta do app; o fator de contraste, pelo
+    simulador de parede (fosco 0,80 · acetinado 0,95 · brilhante 1,10).
+</p>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr><th>Tipo</th><th>Rendimento</th><th>Demãos</th><th>Contraste</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="6" class="vazio">Nenhum tipo de tinta cadastrado.</td></tr>
+            }
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td><strong>@t.Nome</strong> · @t.Acabamento<span class="sub">@t.Descricao</span></td>
+                    <td>@Formatacao.Numero(t.RendimentoM2PorLitro) m²/L</td>
+                    <td>@t.DemaosRecomendadas</td>
+                    <td>@Formatacao.Numero(t.FatorContraste)</td>
+                    <td><span class="badge @(t.Inativo ? "inativo" : "ok")">@(t.Inativo ? "Inativo" : "Ativo")</span></td>
+                    <td>
+                        <div class="acoes">
+                            <a class="btn btn-secundario btn-sm" asp-action="Editar" asp-route-id="@t.Id">Editar</a>
+                            <form asp-action="Excluir" asp-route-id="@t.Id" method="post" data-confirmar="Excluir o tipo &quot;@t.NomeCompleto&quot;?">
+                                <button type="submit" class="btn btn-perigo btn-sm">Excluir</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

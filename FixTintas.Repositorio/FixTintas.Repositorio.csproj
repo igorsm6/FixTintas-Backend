@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- REPOSITORIO: único projeto que conversa com o SQL Server. Depende só de Modelos. -->
+  <ItemGroup>
+    <ProjectReference Include="..\FixTintas.Modelos\FixTintas.Modelos.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Dapper: chama as stored procedures -->
+    <PackageReference Include="Dapper" Version="2.1.89" />
+    <!-- Entity Framework Core para SQL Server: cadastro e consultas comuns -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.*" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

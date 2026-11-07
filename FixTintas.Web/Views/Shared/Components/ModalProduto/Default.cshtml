@@ -1,0 +1,70 @@
+@model ModalProdutoViewModel
+@*
+    Janela "Adicionar ao carrinho" (a mesma do site original).
+    O site.js preenche a janela com os dados do card clicado. O formulário manda
+    só produto, cor e quantidade para /Carrinho/Adicionar; o PedidoNegocio confere
+    tudo (produto à venda, cor obrigatória para tinta, estoque).
+*@
+<div id="modal-produto" class="modal-overlay" hidden>
+    <form class="modal-box modal-produto-box" id="form-produto" asp-area="" asp-controller="Carrinho" asp-action="Adicionar" method="post"
+          role="dialog" aria-modal="true" aria-labelledby="modal-nome" novalidate>
+        <button type="button" class="modal-fechar" data-fechar-produto aria-label="Fechar">✕</button>
+
+        <div class="modal-produto-header">
+            <div class="modal-produto-imagem" id="modal-img"></div>
+            <div>
+                <h2 id="modal-nome"></h2>
+                <p class="modal-marca" id="modal-marca"></p>
+                <div class="preco-normal" id="modal-preco-de" hidden></div>
+                <p class="preco" id="modal-preco"></p>
+            </div>
+        </div>
+
+        <div class="modal-opcao" id="secao-cor">
+            <label id="rotulo-cor">Cor</label>
+            <div class="cores-grid" id="modal-cores" role="radiogroup" aria-labelledby="rotulo-cor">
+                @foreach (var cor in Model.Cores)
+                {
+                    <button type="button" class="cor-item" data-cor-id="@cor.Id" data-cor="@cor.Nome"
+                            style="background:@cor.CodigoHex" title="@cor.Nome" aria-label="@cor.Nome" role="radio" aria-checked="false"></button>
+                }
+            </div>
+            <p id="cor-selecionada" class="cor-selecionada">Nenhuma cor selecionada</p>
+            <a class="link-cores" asp-area="" asp-controller="Cores" asp-action="Index" target="_blank">Ver o catálogo de cores ↗</a>
+        </div>
+
+        <div class="modal-opcao" id="secao-volume">
+            <label id="label-volume">Volume</label>
+            <div class="opcoes-botoes" id="modal-volumes" role="radiogroup" aria-labelledby="label-volume"></div>
+        </div>
+
+        <div class="modal-opcao" id="secao-acabamento">
+            <label>Acabamento</label>
+            <p class="modal-info" id="modal-acabamento"></p>
+        </div>
+
+        <div class="modal-opcao">
+            <label>Quantidade</label>
+            <div class="quantidade-controle">
+                <button type="button" data-quantidade="-1" aria-label="Diminuir a quantidade">−</button>
+                <span id="modal-qtd" aria-live="polite">1</span>
+                <button type="button" data-quantidade="1" aria-label="Aumentar a quantidade">+</button>
+            </div>
+            <p class="modal-estoque" id="modal-estoque"></p>
+        </div>
+
+        <div class="modal-opcao" id="secao-descricao">
+            <label>Descrição</label>
+            <p class="modal-descricao" id="modal-descricao"></p>
+        </div>
+
+        @* Só isto vai para o servidor (o mesmo formato que o app manda para a Api). *@
+        <input type="hidden" name="ProdutoId" id="campo-produto" value="" />
+        <input type="hidden" name="CorId" id="campo-cor" value="" />
+        <input type="hidden" name="Quantidade" id="campo-quantidade" value="1" />
+        <input type="hidden" name="voltarPara" value="@Model.VoltarPara" />
+
+        <p class="fx-erro-modal" id="modal-erro" role="alert"></p>
+        <button type="submit" class="btn-submit">🛒 Adicionar ao Carrinho</button>
+    </form>
+</div>

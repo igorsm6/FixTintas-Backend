@@ -1,0 +1,175 @@
+@model ResumoCarrinho
+@inject FixTintas.Negocio.RegrasDaLoja Regras
+@*
+    Página do carrinho: quantidades, cupom e fechamento da compra.
+    Todos os valores vêm do PedidoNegocio (as mesmas contas do app).
+*@
+@{
+    ViewData["Title"] = "Meu carrinho";
+    ViewData["SemMenu"] = true;
+    var orcamento = Model.Orcamento;
+}
+
+<section class="fx-pagina">
+    <div class="container">
+        <h1 class="fx-titulo">🛒 Meu carrinho</h1>
+
+        @if (Model.Avisos.Count > 0)
+        {
+            <div class="alert alert-warning" role="alert">
+                <strong>Atualizamos o seu carrinho:</strong>
+                <ul class="mb-0 mt-1">
+                    @foreach (var aviso in Model.Avisos)
+                    {
+                        <li>@aviso</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        @if (Model.Vazio || orcamento is null)
+        {
+            <div class="fx-cartao fx-cartao-estreito text-center">
+                <p class="fx-icone-grande" aria-hidden="true">🛒</p>
+                <p class="fs-5">Seu carrinho está vazio.</p>
+                <a class="fx-botao" asp-controller="Produtos" asp-action="Index">Ver produtos</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="fx-cartao p-0">
+                        <ul class="fx-itens">
+                            @foreach (var item in orcamento.Itens)
+                            {
+                                var idQuantidade = $"qtd-{item.ProdutoId}-{item.CorId}";
+                                <li class="fx-item">
+                                    <div class="fx-item-imagem">
+                                        @if (!string.IsNullOrWhiteSpace(item.ImagemUrl))
+                                        {
+                                            <img src="@item.ImagemUrl" alt="" data-sem-imagem="📦" />
+                                        }
+                                        else
+                                        {
+                                            <span aria-hidden="true">@(item.EhTinta ? "🪣" : "🧰")</span>
+                                        }
+                                    </div>
+
+                                    <div class="fx-item-info">
+                                        <strong>@item.ProdutoDescricao</strong>
+                                        @if (item.EhTinta)
+                                        {
+                                            <span class="fx-item-cor"><i class="bolinha-cor" style="background:@item.CorHex"></i>Cor: @item.CorNome</span>
+                                        }
+                                        <span class="fx-item-unitario">@Formatacao.Moeda(item.PrecoUnitario) cada</span>
+                                    </div>
+
+                                    <form class="fx-item-quantidade" asp-action="Atualizar" method="post">
+                                        <input type="hidden" name="produtoId" value="@item.ProdutoId" />
+                                        @if (item.EhTinta)
+                                        {
+                                            <input type="hidden" name="corId" value="@item.CorId" />
+                                        }
+                                        <label class="visually-hidden" for="@idQuantidade">Quantidade</label>
+                                        <input type="number" class="form-control form-control-sm" id="@idQuantidade" name="quantidade"
+                                               value="@item.Quantidade" min="0" max="@Regras.QuantidadeMaximaPorItem" step="1" required />
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Atualizar</button>
+                                    </form>
+
+                                    <div class="fx-item-total">@Formatacao.Moeda(item.Total)</div>
+
+                                    <form asp-action="Remover" method="post">
+                                        <input type="hidden" name="produtoId" value="@item.ProdutoId" />
+                                        @if (item.EhTinta)
+                                        {
+                                            <input type="hidden" name="corId" value="@item.CorId" />
+                                        }
+                                        <button type="submit" class="fx-remover" title="Remover" aria-label="Remover @item.ProdutoDescricao">✕</button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <p class="mt-3">
+                        <a asp-controller="Produtos" asp-action="Index">‹ Continuar comprando</a>
+                    </p>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="fx-cartao fx-resumo">
+                        <h2>Resumo do pedido</h2>
+                        <dl>
+                            <div>
+                                <dt>Subtotal (@orcamento.QuantidadeItens @(orcamento.QuantidadeItens == 1 ? "item" : "itens"))</dt>
+                                <dd>@Formatacao.Moeda(orcamento.Subtotal)</dd>
+                            </div>
+                            @if (orcamento.DescontoVolume > 0)
+                            {
+                                <div class="desconto">
+                                    <dt>Desconto por volume (@Formatacao.Numero(Regras.DescontoVolumePercentual)%)</dt>
+                                    <dd>− @Formatacao.Moeda(orcamento.DescontoVolume)</dd>
+                                </div>
+                            }
+                            @if (orcamento.DescontoCupom > 0)
+                            {
+                                <div class="desconto">
+                                    <dt>Cupom @orcamento.Cupom</dt>
+                                    <dd>− @Formatacao.Moeda(orcamento.DescontoCupom)</dd>
+                                </div>
+                            }
+                            <div class="total">
+                                <dt>Total</dt>
+                                <dd>@Formatacao.Moeda(orcamento.Total)</dd>
+                            </div>
+                        </dl>
+
+                        @if (orcamento.LitrosTotais > 0)
+                        {
+                            <p class="fx-dica">🪣 @Formatacao.Numero(orcamento.LitrosTotais) litros de tinta neste pedido.</p>
+                        }
+                        @if (orcamento.DescontoVolume == 0 && Regras.DescontoVolumePercentual > 0)
+                        {
+                            <p class="fx-dica">💡 Compras a partir de @Formatacao.Moeda(Regras.DescontoVolumeAcimaDe) ganham @Formatacao.Numero(Regras.DescontoVolumePercentual)% de desconto.</p>
+                        }
+
+                        @* Cupom: o PedidoNegocio confere validade, limite de usos e valor mínimo. *@
+                        @if (string.IsNullOrEmpty(orcamento.Cupom))
+                        {
+                            <form class="fx-cupom" asp-action="AplicarCupom" method="post">
+                                <label for="cupom" class="form-label">Cupom de desconto</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="cupom" name="cupom" maxlength="40" placeholder="Ex.: BEMVINDO10" autocomplete="off" />
+                                    <button type="submit" class="btn btn-outline-primary">Aplicar</button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <form class="fx-cupom fx-cupom-aplicado" asp-action="RemoverCupom" method="post">
+                                <span>🎟️ Cupom <strong>@orcamento.Cupom</strong> aplicado</span>
+                                <button type="submit" class="btn btn-sm btn-link">Remover</button>
+                            </form>
+                        }
+
+                        @if (User.EstaLogado())
+                        {
+                            <form asp-action="Finalizar" method="post" class="mt-3">
+                                <button type="submit" class="btn-finalizar">Finalizar Compra</button>
+                            </form>
+                            <p class="fx-dica text-center mt-2">O pedido fica como <strong>Pendente</strong> até a loja confirmar o pagamento.</p>
+                        }
+                        else
+                        {
+                            <div class="fx-entrar-para-comprar">
+                                <p>Para finalizar a compra, entre na sua conta.</p>
+                                <a class="btn-finalizar" asp-controller="Conta" asp-action="Entrar" asp-route-returnUrl="/Carrinho">Entrar e finalizar</a>
+                                <p class="mt-2 mb-0">Ainda não tem conta? <a asp-controller="Conta" asp-action="Cadastrar" asp-route-returnUrl="/Carrinho">Cadastre-se</a></p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,177 @@
+@*
+    LAYOUT DA LOJA: o "molde" de todas as páginas do site (menu de cima, menu lateral,
+    rodapé, carrinho). Cada página entra no lugar do @RenderBody().
+    O visual é o do site original (wwwroot/css/site.css = style2.css).
+
+    ViewData que as páginas podem mandar:
+      ViewData["Title"]        título da aba do navegador
+      ViewData["SemMenu"]      true = esconde o menu lateral de categorias (carrinho, conta...)
+      ViewData["PaginaDeErro"] true = não consulta o banco (a página de erro precisa abrir mesmo se o banco cair)
+*@
+@inject CarrinhoDaSessao CarrinhoDaSessao
+@inject AppAndroid AppAndroid
+@{
+    var paginaDeErro = ViewData["PaginaDeErro"] is true;
+    var semMenu = paginaDeErro || ViewData["SemMenu"] is true;
+    var resumo = paginaDeErro ? new ResumoCarrinho() : CarrinhoDaSessao.Resumo();
+    var logado = User.EstaLogado();
+    var termoBusca = Context.Request.Query["termo"].ToString();
+
+    // Depois de entrar, o cliente volta para a página em que estava (só páginas abertas por GET).
+    string? voltarDepoisDoLogin = HttpMethods.IsGet(Context.Request.Method)
+        ? Context.Request.Path + Context.Request.QueryString
+        : null;
+
+    // O carrinho abre sozinho logo depois de "Adicionar ao carrinho".
+    ViewData["AbrirCarrinho"] = TempData["AbrirCarrinho"] as string == "1";
+
+    // Janela "Baixe o app" (celular Android): só nas páginas de navegação da loja,
+    // nunca no meio de um cadastro, carrinho ou pedido. Ver _JanelaApp.cshtml.
+    var controlador = ViewContext.RouteData.Values["controller"] as string;
+    var acao = ViewContext.RouteData.Values["action"] as string;
+    var paginaDeNavegacao = (controlador == "Home" && acao == "Index") || controlador == "Produtos" || controlador == "Cores";
+    var mostrarJanelaApp = !paginaDeErro
+        && ViewContext.RouteData.Values["area"] is null
+        && paginaDeNavegacao
+        && AppAndroid.Disponivel;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FixTintas</title>
+    <link rel="icon" href="~/favicon.ico" />
+    @* Mesma ordem do site original: o CSS do site, depois o Bootstrap; por último, o CSS das telas novas. *@
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/loja.css" asp-append-version="true" />
+</head>
+<body class="@(semMenu ? "sem-menu" : null)">
+
+    <nav>
+        <div class="container">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="link-logo">
+                <img src="~/img/logo.png" alt="Logo FixTintas" class="navbar-logo" />
+            </a>
+            <ul id="nav-menu">
+                <li><a asp-area="" asp-controller="Home" asp-action="Index">Início</a></li>
+                <li><a asp-area="" asp-controller="Produtos" asp-action="Index">Produtos</a></li>
+                <li><a asp-area="" asp-controller="Cores" asp-action="Index">Cores</a></li>
+                <li><a asp-area="" asp-controller="App" asp-action="Index">App</a></li>
+                <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="sobre">Sobre</a></li>
+                <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="contato">Contato</a></li>
+            </ul>
+
+            @* A busca é um formulário GET: /Produtos?termo=verniz *@
+            <form class="busca-wrapper" asp-area="" asp-controller="Produtos" asp-action="Index" method="get" role="search" autocomplete="off">
+                <div class="barra-busca">
+                    <input type="search" id="input-busca" name="termo" value="@termoBusca" maxlength="100"
+                           placeholder="Buscar produtos..." aria-label="Buscar produtos" />
+                    <button type="submit" id="btn-busca" aria-label="Buscar">🔍</button>
+                </div>
+                <div class="dropdown-busca" id="dropdown-busca"></div>
+            </form>
+
+            <button type="button" class="btn-carrinho" data-abrir-carrinho aria-label="Abrir o carrinho">
+                🛒 <span id="carrinho-badge">@resumo.QuantidadeItens</span>
+            </button>
+            @if (logado)
+            {
+                <button type="button" class="btn-login" data-menu-usuario aria-haspopup="true" aria-expanded="false">👤 @User.PrimeiroNome()</button>
+            }
+            else
+            {
+                <a class="btn-login" asp-area="" asp-controller="Conta" asp-action="Entrar" asp-route-returnUrl="@voltarDepoisDoLogin">👤 Login</a>
+            }
+            <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Abrir menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+
+        @* Celular: carrinho e login ficam abaixo do menu aberto *@
+        <div class="nav-mobile-acoes">
+            <button type="button" class="btn-carrinho" data-abrir-carrinho>🛒 <span>Carrinho (@resumo.QuantidadeItens)</span></button>
+            @if (logado)
+            {
+                <button type="button" class="btn-login" data-menu-usuario aria-haspopup="true" aria-expanded="false">👤 @User.PrimeiroNome()</button>
+            }
+            else
+            {
+                <a class="btn-login" asp-area="" asp-controller="Conta" asp-action="Entrar" asp-route-returnUrl="@voltarDepoisDoLogin">👤 Login</a>
+            }
+        </div>
+    </nav>
+
+    @if (logado)
+    {
+        @* Menu do usuário (abre ao clicar no nome, no canto de cima) *@
+        <div id="fx-menu-usuario" class="fx-menu-usuario" hidden>
+            <div class="fx-cab">
+                <strong>Olá, @(User.Identity?.Name)</strong>
+                <small>@Perfis.Rotulo(User.Perfil()) · @(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)</small>
+            </div>
+            @if (User.EhEquipe())
+            {
+                <a asp-area="Painel" asp-controller="Inicio" asp-action="Index">🛠️ Painel da equipe</a>
+            }
+            <a asp-area="" asp-controller="Pedidos" asp-action="Index">📦 Meus pedidos</a>
+            <a asp-area="" asp-controller="Cores" asp-action="Index" asp-route-favoritas="true">❤️ Cores favoritas</a>
+            <a asp-area="" asp-controller="Conta" asp-action="MeusDados">👤 Meus dados</a>
+            <a asp-area="" asp-controller="Conta" asp-action="AlterarSenha">🔑 Alterar senha</a>
+            <form asp-area="" asp-controller="Conta" asp-action="Sair" method="post">
+                <button type="submit">🚪 Sair</button>
+            </form>
+        </div>
+    }
+
+    @if (!semMenu)
+    {
+        @* Menu lateral (categorias, marcas e filtros): ViewComponents/MenuCategoriasViewComponent.cs *@
+        @await Component.InvokeAsync("MenuCategorias")
+    }
+
+    <main>
+        @RenderBody()
+
+        <footer>
+            <p class="m-0 py-2">
+                <a class="fx-rodape-app" asp-area="" asp-controller="App" asp-action="Index">📱 Baixe o app FixTintas para Android</a>
+                <span class="fx-rodape-separador" aria-hidden="true">·</span>
+                &copy; @DateTime.Now.Year FixTintas. Todos os direitos reservados.
+            </p>
+        </footer>
+    </main>
+
+    <partial name="_PainelCarrinho" model="resumo" />
+    <partial name="_Mensagens" />
+
+    @if (mostrarJanelaApp)
+    {
+        <partial name="_JanelaApp" />
+    }
+
+    @if (!paginaDeErro)
+    {
+        @* Nomes dos produtos para as sugestões da busca (lidos pelo site.js) *@
+        @await Component.InvokeAsync("BuscaRapida")
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    @* VLibras (acessibilidade em Libras), como no site original *@
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
+    </script>
+</body>
+</html>
