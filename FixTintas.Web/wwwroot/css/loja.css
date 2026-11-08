@@ -197,7 +197,59 @@ a.aba:hover { color: var(--fx-azul); }
 .fx-rotulo { display: block; font-size: .8rem; font-weight: 700; color: var(--fx-azul); margin: 0 0 4px; }
 .form-modal .field-validation-error { display: block; color: var(--fx-vermelho); font-size: .82rem; margin: -10px 0 12px; }
 .fx-aviso-senha {
-    background: #fff4d6; border: 1px solid #f4b400; border-radius: 10px; padding: 10px 14px; font-size: .9rem; margin-bottom: 14px;
+    /* Campo de senha com o botão de olho (montado pelo site.js) */
+    .fx-campo-senha {
+        position: relative;
+        margin-bottom: 14px;
+    }
+
+    .form-modal .fx-campo-senha input {
+        margin-bottom: 0;
+        padding-right: 46px;
+    }
+
+    .fx-olho-senha {
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--fx-cinza);
+        cursor: pointer;
+    }
+
+        .fx-olho-senha:hover {
+            color: var(--fx-azul);
+            background: #f2f4f8;
+        }
+
+        .fx-olho-senha:focus-visible {
+            outline: 2px solid var(--fx-azul);
+            outline-offset: 1px;
+        }
+
+        .fx-olho-senha[aria-pressed="true"] {
+            color: var(--fx-azul);
+        }
+    /* Esconde o olho que o Edge desenha sozinho, para não aparecerem dois */
+    .fx-campo-senha input::-ms-reveal {
+        display: none;
+    }
+
+    background: #fff4d6;
+    border: 1px solid #f4b400;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: .9rem;
+    margin-bottom: 14px;
 }
 
 /* Validação (classes que o ASP.NET Core põe nos campos) */
@@ -468,3 +520,79 @@ a.aba:hover { color: var(--fx-azul); }
     .fx-rodape-separador { display: none; }
     .fx-rodape-app { display: block; margin-bottom: 4px; }
 }
+/* Campo de senha com o botão de olho (montado pelo site.js) */
+.fx-campo-senha {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.form-modal .fx-campo-senha input {
+    margin-bottom: 0;
+    padding-right: 46px;
+}
+
+.fx-olho-senha {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fx-cinza);
+    cursor: pointer;
+}
+
+    .fx-olho-senha:hover {
+        color: var(--fx-azul);
+        background: #f2f4f8;
+    }
+
+    .fx-olho-senha:focus-visible {
+        outline: 2px solid var(--fx-azul);
+        outline-offset: 1px;
+    }
+
+    .fx-olho-senha[aria-pressed="true"] {
+        color: var(--fx-azul);
+    }
+/* Esconde o olho que o Edge desenha sozinho, para não aparecerem dois */
+.fx-campo-senha input::-ms-reveal {
+    display: none;
+}
+
+/* "Esqueci a senha" (tela Entrar) */
+.fx-esqueci-senha {
+    margin: -4px 0 14px;
+    font-size: .88rem;
+}
+
+    .fx-esqueci-senha summary {
+        cursor: pointer;
+        color: var(--fx-azul);
+        font-weight: 600;
+        text-align: right;
+        list-style: none;
+    }
+
+        .fx-esqueci-senha summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .fx-esqueci-senha summary:hover {
+            color: var(--fx-laranja-escuro);
+        }
+
+    .fx-esqueci-senha p {
+        margin: 8px 0 0;
+        padding: 10px 12px;
+        background: #f2f4f8;
+        border-radius: 8px;
+        color: #444;
+    }

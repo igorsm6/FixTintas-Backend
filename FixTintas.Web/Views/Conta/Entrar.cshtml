@@ -25,6 +25,10 @@
                 <label asp-for="Senha" class="fx-rotulo"></label>
                 <input asp-for="Senha" type="password" placeholder="Sua senha" autocomplete="current-password" />
                 <span asp-validation-for="Senha"></span>
+                <details class="fx-esqueci-senha">
+                    <summary>Esqueci a senha</summary>
+                    <p>A recuperação de senha ainda está em desenvolvimento e será disponibilizada em breve.</p>
+                </details>
 
                 <button type="submit" class="btn-submit">Entrar</button>
                 <p class="link-form">Ainda não tem conta? <a asp-action="Cadastrar" asp-route-returnUrl="@returnUrl">Cadastre-se</a></p>
